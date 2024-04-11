@@ -19,7 +19,15 @@ fuzz: $(RAZZLE_DIR) $(STARSHIP_DIR)/build
 	mkdir -p $(FUZZ_BUILD)
 	cd $(RAZZLE_DIR); \
 	PYTHONPATH=`pwd` python3 razzle/main.py -I $(RAZZLE_DIR)/config/testcase/mem_init.hjson -O $(FUZZ_BUILD) $(FUZZ_MODE)
+	
+vcs:
 	make -C $(STARSHIP_DIR) vcs STARSHIP_TESTCASE=$(FUZZ_CODE)
+
+vlt:
+	make -C $(STARSHIP_DIR) vlt STARSHIP_TESTCASE=$(FUZZ_CODE)
+
+sim:
+	$(STARSHIP_DIR)/build/spike/spike --log=./log --log-commits -l -d $(FUZZ_CODE)
 
 fuzz-physics: fuzz
 fuzz-virtual: fuzz
