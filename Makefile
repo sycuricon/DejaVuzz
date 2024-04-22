@@ -23,11 +23,17 @@ fuzz: $(RAZZLE_DIR) $(STARSHIP_DIR)/build
 vcs:
 	make -C $(STARSHIP_DIR) vcs STARSHIP_TESTCASE=$(FUZZ_CODE)
 
+vcs-debug:
+	make -C $(STARSHIP_DIR) vcs-debug STARSHIP_TESTCASE=$(FUZZ_CODE)
+
+vcs-wave:
+	make -C $(STARSHIP_DIR) vcs-wave STARSHIP_TESTCASE=$(FUZZ_CODE)
+
 vlt:
 	make -C $(STARSHIP_DIR) vlt STARSHIP_TESTCASE=$(FUZZ_CODE)
 
 sim:
-	$(STARSHIP_DIR)/build/spike/spike --log=./log --log-commits -l -d $(FUZZ_CODE)
+	$(STARSHIP_DIR)/build/spike/spike --log=./log --log-commits -l -d $(FUZZ_BUILD)/origin.dist
 
 fuzz-physics: fuzz
 fuzz-virtual: fuzz
