@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-set -vx
+set -vxe
 
 PWD=`pwd`
 
@@ -36,12 +36,12 @@ do
                 --dut_init_file $TESTCASE_HOME/$target.guess$guess.riscv.bin \
                 --vnt_init_file $TESTCASE_HOME/$target.guess$guess.riscv.variant.bin \
                 --output_file $PWD/build/regress/$target.$guess.cfg
-	make -C $STARSHIP_HOME $SIMULATOR STARSHIP_TESTCASE=$PWD/build/regress/$target.$guess.cfg SIMULATION_LABEL=$target.$guess &
+	make $SIMULATOR TEST_INPUT=$PWD/build/regress/$target.$guess.cfg TEST_NAME=$target.$guess
 done
 
 done
 
 wait
 
-make -C $STARSHIP_HOME plot_${SIMULATOR}_taint
+make ${SIMULATOR}-plot
 

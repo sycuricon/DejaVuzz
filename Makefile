@@ -2,21 +2,20 @@ TOP				:= $(CURDIR)
 STARSHIP_DIR	:= $(TOP)/starship-parafuzz
 RAZZLE_DIR		:= $(TOP)/InstGenerator
 BUILD			:= $(TOP)/build
+FUZZ_BUILD		:= $(BUILD)/fuzz_code
 
-
-FUZZ_SRC	=	$(SRC)/InstGenerator
-FUZZ_BUILD	=	$(BUILD)/fuzz_code
-
-TARGET_CORE	=	BOOM
-SIM_MODE	=	variant
+TARGET_CORE		?= XiangShan
+SIM_MODE		?= variant
+TEST_INPUT		?= $(FUZZ_BUILD)/Testbench
+TEST_NAME		?= default
 
 export STARSHIP_CORE = $(TARGET_CORE)
 export SIMULATION_MODE = $(SIM_MODE)
+export STARSHIP_TESTCASE = $(TEST_INPUT)
+export SIMULATION_LABEL = $(TEST_NAME)
+export XS_REPO_DIR = /home/phantom/work/xiangshan-dejavuzz
 
-FUZZ_CODE	=	$(FUZZ_BUILD)/Testbench
-
-FUZZ_MODE = 
-
+FUZZ_MODE 	?=
 fuzz-virtual: 		FUZZ_MODE += -V
 fuzz-do-physics: 	FUZZ_MODE += --fuzz
 fuzz-do-virtual: 	FUZZ_MODE += -V --fuzz
@@ -27,7 +26,16 @@ fuzz: $(RAZZLE_DIR) $(STARSHIP_DIR)/build
 	cd $(RAZZLE_DIR); \
 	PYTHONPATH=`pwd` python3 razzle/main.py -I $(RAZZLE_DIR)/config/testcase/mem_init.hjson -O $(FUZZ_BUILD) $(FUZZ_MODE)
 
-export EXTRA_SIM_ARGS = +origin_dist=$(FUZZ_BUILD)/origin.dist +variant_dist=$(FUZZ_BUILD)/variant.dist +max-cycles=500
+fuzz-physics: fuzz
+fuzz-virtual: fuzz
+fuzz-do-physics: fuzz
+fuzz-do-virtual: fuzz
+fuzz-do-virtual-debug: fuzz
+
+sim:
+	$(STARSHIP_DIR)/build/spike/spike --log=./log --log-commits -l -d $(FUZZ_BUILD)/origin.dist
+
+export EXTRA_SIM_ARGS =
 
 vcs:
 	make -C $(STARSHIP_DIR) vcs
@@ -38,14 +46,12 @@ vcs-debug:
 vcs-wave:
 	make -C $(STARSHIP_DIR) vcs-wave
 
+vcs-plot:
+	make -C $(STARSHIP_DIR) plot_vcs_taint
+
 vlt:
 	make -C $(STARSHIP_DIR) vlt
 
-sim:
-	$(STARSHIP_DIR)/build/spike/spike --log=./log --log-commits -l -d $(FUZZ_BUILD)/origin.dist
 
-fuzz-physics: fuzz
-fuzz-virtual: fuzz
-fuzz-do-physics: fuzz
-fuzz-do-virtual: fuzz
-fuzz-do-virtual-debug: fuzz
+
+
