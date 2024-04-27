@@ -7,6 +7,12 @@ BUILD			:= $(TOP)/build
 FUZZ_SRC	=	$(SRC)/InstGenerator
 FUZZ_BUILD	=	$(BUILD)/fuzz_code
 
+TARGET_CORE	=	BOOM
+SIM_MODE	=	variant
+
+export STARSHIP_CORE = $(TARGET_CORE)
+export SIMULATION_MODE = $(SIM_MODE)
+
 FUZZ_CODE	=	$(FUZZ_BUILD)/Testbench
 
 FUZZ_MODE = 

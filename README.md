@@ -1,4 +1,6 @@
-# ParaFuzz
+# DejaVuzz
+
+## Usage
 
 1. Install our customized yosys from the yosys-pift repository, compile and place the directory in your `PATH`.
 
@@ -27,11 +29,16 @@ git clone https://github.com/sycuricon/starship-parafuzz.git
 cd starship-parafuzz
 git submodule update --init --recursive --progress
 make patch
-make verilog-instrument
 ```
+
+> Notice: We dont't need to execute `make verilog-instrument` anymore.
 
 4. Back to the repository root directory, and test the workflow.
 
 ```bash
 make fuzz
 ```
+
+## Customization
+
+- Overwirite the `TARGET_CORE` and `SIM_MODE` in the `Makefile` to customize the target core and simulation mode.
