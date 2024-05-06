@@ -5,7 +5,6 @@ BUILD			:= $(TOP)/build
 
 
 FUZZ_SRC	=	$(SRC)/InstGenerator
-FUZZ_BUILD	=	$(BUILD)/fuzz_code
 
 TARGET_CORE	=	BOOM
 SIM_MODE	=	variant
@@ -15,19 +14,22 @@ export STARSHIP_CORE = $(TARGET_CORE)
 export SIMULATION_MODE = $(SIM_MODE)
 export STARSHIP_TESTCASE = $(FUZZ_BUILD)/swap_mem.cfg
 
+FUZZ_BUILD	=	$(BUILD)/$(TARGET_CORE).fuzz_code
 
-FUZZ_CODE	=	$(FUZZ_BUILD)/Testbench
-
-FUZZ_CODE = 
 GEN_MODE = gen
 STAGE1_MODE = stage1 --rtl_sim=$(TOP) --rtl_sim_mode=vcs\
 	--taint_log=$(STARSHIP_DIR)/build/vcs/starship.asic.StarshipSimMiniConfig_BOOM_variant/wave/swap_mem.cfg.taint\
-	--repo_path=$(BUILD)/template_repo 
+	--repo_path=$(BUILD)/$(TARGET_CORE).template_repo --core=$(TARGET_CORE)
+STAGE2_MODE = stage2 --rtl_sim=$(TOP) --rtl_sim_mode=vcs\
+	--taint_log=$(STARSHIP_DIR)/build/vcs/starship.asic.StarshipSimMiniConfig_BOOM_variant/wave/swap_mem.cfg.taint\
+	--repo_path=$(BUILD)/$(TARGET_CORE).template_repo --core=$(TARGET_CORE)
 
 gen-do-physics: 	FUZZ_MODE += $(GEN_MODE)
 gen-do-virtual: 	FUZZ_MODE += -V $(GEN_MODE)
 stage1-do-physics: 	FUZZ_MODE += $(STAGE1_MODE)
 stage1-do-virtual:	FUZZ_MODE += -V $(STAGE1_MODE)
+stage2-do-physics: 	FUZZ_MODE += $(STAGE2_MODE)
+stage2-do-virtual:	FUZZ_MODE += -V $(STAGE2_MODE)
 
 fuzz: $(RAZZLE_DIR) $(STARSHIP_DIR)/build
 	rm -rf $(FUZZ_BUILD)
@@ -44,6 +46,9 @@ vcs-debug:
 vcs-wave:
 	make -C $(STARSHIP_DIR) vcs-wave
 
+verdi:
+	make -C $(STARSHIP_DIR) verdi
+
 vlt:
 	make -C $(STARSHIP_DIR) vlt
 
@@ -54,3 +59,5 @@ gen-do-physics: 	fuzz
 gen-do-virtual: 	fuzz
 stage1-do-physics: 	fuzz
 stage1-do-virtual:	fuzz
+stage2-do-physics: 	fuzz
+stage2-do-virtual:	fuzz
