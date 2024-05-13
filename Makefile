@@ -3,13 +3,18 @@ STARSHIP_DIR	:= $(TOP)/starship-parafuzz
 RAZZLE_DIR		:= $(TOP)/InstGenerator
 BUILD			:= $(TOP)/build
 
-SIM_MODE	?=	variant
 
-FUZZ_BUILD	=	$(BUILD)/$(TARGET_CORE).fuzz_code
+FUZZ_SRC	=	$(SRC)/InstGenerator
+
+TARGET_CORE	=	BOOM
+SIM_MODE	?=	variant
+# SIM_MODE	=	normal
 
 export STARSHIP_CORE = $(TARGET_CORE)
 export SIMULATION_MODE = $(SIM_MODE)
 export STARSHIP_TESTCASE ?= $(FUZZ_BUILD)/swap_mem.cfg
+
+FUZZ_BUILD	=	$(BUILD)/$(TARGET_CORE).fuzz_code
 
 GEN_MODE = gen
 BASIC_CONFIG = --rtl_sim=$(TOP) --rtl_sim_mode=vcs\
@@ -17,7 +22,7 @@ BASIC_CONFIG = --rtl_sim=$(TOP) --rtl_sim_mode=vcs\
 	--repo_path=$(BUILD)/$(TARGET_CORE).template_repo
 FUZZ_MODE = fuzz $(BASIC_CONFIG)
 ITER_NUM ?= 0
-LOAD_MODE = load $(BASIC_CONFIG)
+LOAD_MODE = load -$(BASIC_CONFIG)
 TRIGGER_TEST = trigger_test $(BASIC_CONFIG)
 FRONT_END_TEST = front_end_test $(BASIC_CONFIG)
 WORK_MODE = 
