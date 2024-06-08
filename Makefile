@@ -25,10 +25,10 @@ FUZZ_MODE = fuzz $(BASIC_CONFIG)
 ITER_NUM ?= 0
 WORK_MODE = 
 
-gen-do-physics: 	WORK_MODE += $(GEN_MODE)
-gen-do-virtual: 	WORK_MODE += -V $(GEN_MODE)
-fuzz-do-physics: 	WORK_MODE += $(FUZZ_MODE)
-fuzz-do-virtual:	WORK_MODE += -V $(FUZZ_MODE)
+do-gen: 	WORK_MODE += $(GEN_MODE)
+do-fuzz: 	WORK_MODE += $(FUZZ_MODE)
+cov_draw_time:	WORK_MODE += -m time
+cov_draw_iter:	WORK_MODE += -m iter
 
 fuzz: $(RAZZLE_DIR) $(STARSHIP_DIR)/build
 	mkdir -p $(FUZZ_BUILD)
@@ -50,7 +50,7 @@ analysis:
 cov_draw:
 	cd $(RAZZLE_DIR); \
 	time PYTHONPATH=`pwd` python3 razzle/coverage_draw.py \
-		-I $(REPO_PATH)/fuzz.log
+		-I $(REPO_PATH)/fuzz.log $(WORK_MODE)
 
 vcs:
 	make -C $(STARSHIP_DIR) vcs
@@ -70,7 +70,7 @@ vlt:
 sim:
 	$(STARSHIP_DIR)/build/spike/spike --log=./log --log-commits -l -d $(FUZZ_BUILD)/origin.dist
 
-gen-do-physics: 	fuzz
-gen-do-virtual: 	fuzz
-fuzz-do-physics: 	fuzz
-fuzz-do-virtual:	fuzz
+do-gen: 	fuzz
+do-fuzz:	fuzz
+cov_draw_iter: 	cov_draw
+cov_draw_time:	cov_draw
