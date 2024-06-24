@@ -8,33 +8,61 @@ FUZZ_SRC	=	$(SRC)/InstGenerator
 
 TARGET_CORE	=	BOOM
 SIM_MODE	?=	variant
-# SIM_MODE	=	normal
+SIMULATION_LABEL	?= 	swap_mem
 
 export STARSHIP_CORE = $(TARGET_CORE)
 export SIMULATION_MODE = $(SIM_MODE)
 export STARSHIP_TESTCASE ?= $(FUZZ_BUILD)/swap_mem.cfg
 
 FUZZ_BUILD	=	$(BUILD)/$(TARGET_CORE).fuzz_code
+THREAD_NUM  ?= 	4
 
 GEN_MODE = gen
 REPO_PATH = $(BUILD)/$(TARGET_CORE).template_repo
 BASIC_CONFIG = --rtl_sim=$(TOP) --rtl_sim_mode=vcs\
 	--taint_log=$(STARSHIP_DIR)/build/vcs/starship.asic.StarshipSimMiniConfig_BOOM\
-	--repo_path=$(REPO_PATH)
+	--repo_path=$(REPO_PATH)\
+	--thread_num=$(THREAD_NUM)
 FUZZ_MODE = fuzz $(BASIC_CONFIG)
 ITER_NUM ?= 0
 WORK_MODE = 
 
 do-gen: 	WORK_MODE += $(GEN_MODE)
 do-fuzz: 	WORK_MODE += $(FUZZ_MODE)
-cov_draw_time:	WORK_MODE += -m time
-cov_draw_iter:	WORK_MODE += -m iter
 
 fuzz: $(RAZZLE_DIR) $(STARSHIP_DIR)/build
 	mkdir -p $(FUZZ_BUILD)
 	cd $(RAZZLE_DIR); \
 	time PYTHONPATH=`pwd` python3 razzle/main.py -I $(RAZZLE_DIR)/config/testcase/mem_init.hjson\
 		-O $(FUZZ_BUILD) $(WORK_MODE)
+
+vcs:
+	make -C $(STARSHIP_DIR) vcs 
+
+vcs-wave:
+	make -C $(STARSHIP_DIR) vcs-wave
+
+plot_vcs_local_taint:
+	make -C $(STARSHIP_DIR) plot_vcs_local_taint
+
+do-gen: 	fuzz
+do-fuzz:	fuzz
+
+# other
+
+vcs-debug:
+	make -C $(STARSHIP_DIR) vcs-debug
+
+verdi:
+	make -C $(STARSHIP_DIR) verdi
+
+vlt:
+	make -C $(STARSHIP_DIR) vlt
+
+sim:
+	$(STARSHIP_DIR)/build/spike/spike --log=./log --log-commits -l -d $(FUZZ_BUILD)/origin.dist
+
+# utils
 
 compile: $(RAZZLE_DIR)
 	cd $(RAZZLE_DIR); \
@@ -47,30 +75,15 @@ analysis:
 		-O $(REPO_PATH)/trigger_analysis.md \
 		--mode trigger
 
+# draw coverage
+
+cov_draw_time:	WORK_MODE += -m time
+cov_draw_iter:	WORK_MODE += -m iter
+
 cov_draw:
 	cd $(RAZZLE_DIR); \
 	time PYTHONPATH=`pwd` python3 razzle/coverage_draw.py \
 		-I $(REPO_PATH)/fuzz.log $(WORK_MODE)
 
-vcs:
-	make -C $(STARSHIP_DIR) vcs
-
-vcs-debug:
-	make -C $(STARSHIP_DIR) vcs-debug
-
-vcs-wave:
-	make -C $(STARSHIP_DIR) vcs-wave
-
-verdi:
-	make -C $(STARSHIP_DIR) verdi
-
-vlt:
-	make -C $(STARSHIP_DIR) vlt
-
-sim:
-	$(STARSHIP_DIR)/build/spike/spike --log=./log --log-commits -l -d $(FUZZ_BUILD)/origin.dist
-
-do-gen: 	fuzz
-do-fuzz:	fuzz
 cov_draw_iter: 	cov_draw
 cov_draw_time:	cov_draw
