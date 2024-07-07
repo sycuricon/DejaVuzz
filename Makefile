@@ -45,9 +45,6 @@ vcs:
 vcs-wave:
 	make -C $(STARSHIP_DIR) vcs-wave
 
-plot_vcs_local_taint:
-	make -C $(STARSHIP_DIR) plot_vcs_local_taint
-
 do-gen: 	fuzz
 do-fuzz:	fuzz
 
