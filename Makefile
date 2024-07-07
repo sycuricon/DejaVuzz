@@ -14,17 +14,18 @@ export STARSHIP_CORE = $(TARGET_CORE)
 export SIMULATION_MODE = $(SIM_MODE)
 export STARSHIP_TESTCASE ?= $(FUZZ_BUILD)/swap_mem.cfg
 
-FUZZ_BUILD	=	$(BUILD)/$(TARGET_CORE).fuzz_code
+PREFIX ?= $(TARGET_CORE)
+FUZZ_PREFIX	=	$(BUILD)/$(PREFIX)
+FUZZ_BUILD  =   $(FUZZ_PREFIX).fuzz_code
+REPO_PATH 	= 	$(FUZZ_PREFIX).template_repo
 THREAD_NUM  ?= 	4
 
 GEN_MODE = gen
-REPO_PATH = $(BUILD)/$(TARGET_CORE).template_repo
 BASIC_CONFIG = --rtl_sim=$(TOP) --rtl_sim_mode=vcs\
-	--taint_log=$(STARSHIP_DIR)/build/vcs/starship.asic.StarshipSimMiniConfig_BOOM\
+	--taint_log=$(STARSHIP_DIR)/build/vcs/starship.asic.StarshipSimMiniConfig_$(TARGET_CORE)\
 	--repo_path=$(REPO_PATH)\
 	--thread_num=$(THREAD_NUM)
 FUZZ_MODE = fuzz $(BASIC_CONFIG)
-ITER_NUM ?= 0
 WORK_MODE = 
 
 do-gen: 	WORK_MODE += $(GEN_MODE)
@@ -34,7 +35,9 @@ fuzz: $(RAZZLE_DIR) $(STARSHIP_DIR)/build
 	mkdir -p $(FUZZ_BUILD)
 	cd $(RAZZLE_DIR); \
 	time PYTHONPATH=`pwd` python3 razzle/main.py -I $(RAZZLE_DIR)/config/testcase/mem_init.hjson\
-		-O $(FUZZ_BUILD) $(WORK_MODE)
+		-O $(FUZZ_BUILD)\
+		--prefix $(PREFIX)\
+		$(WORK_MODE)
 
 vcs:
 	make -C $(STARSHIP_DIR) vcs 
