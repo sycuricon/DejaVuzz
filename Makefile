@@ -64,7 +64,12 @@ REPO_PATH = $(BUILD)/$(PREFIX).template_repo
 
 compile: $(RAZZLE_DIR)
 	cd $(RAZZLE_DIR); \
-	PYTHONPATH=`pwd` python3 razzle/offline_compiler.py -I $(STARSHIP_TESTCASE)
+	PYTHONPATH=`pwd` python3 razzle/main.py\
+		-I $(RAZZLE_DIR)/config/testcase/mem_init.hjson\
+		-O $(BUILD)\
+		--prefix $(PREFIX)\
+		compile\
+		--mem_cfg $(STARSHIP_TESTCASE)
 
 analysis:
 	cd $(RAZZLE_DIR); \
