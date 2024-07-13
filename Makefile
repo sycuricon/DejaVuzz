@@ -56,7 +56,7 @@ vlt:
 	make -C $(STARSHIP_DIR) vlt
 
 sim:
-	$(STARSHIP_DIR)/build/spike/spike --log=./log --log-commits -l -d $(FUZZ_BUILD)/origin.dist
+	$(STARSHIP_DIR)/build/spike/spike --log=./log --log-commits -l -d $(STARSHIP_TESTCASE)
 
 # utils
 
