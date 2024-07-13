@@ -11,7 +11,7 @@ SIMULATION_LABEL	?= 	swap_mem
 
 export STARSHIP_CORE = $(TARGET_CORE)
 export SIMULATION_MODE = $(SIM_MODE)
-export STARSHIP_TESTCASE ?= $(FUZZ_BUILD)/swap_mem.cfg
+export STARSHIP_TESTCASE ?= swap_mem.cfg
 
 PREFIX ?= $(TARGET_CORE)
 THREAD_NUM  ?= 	16
