@@ -64,3 +64,7 @@ execute `make vcs-debug` to dump the commit information of the program execution
 execute `make cov_draw_iter` to draw the coverage figure using iteration as x axis
 
 execute `make cov_draw_time` to draw the coverage figure using time as x axis
+
+execute `make compile PREFIX=xxx STARSHIP_TESTCASE=xxx` to compile testcase offline.
+The prefix is the prefix of the domain of the testcase, 
+the STARSHIP_TESTCASE is the file path of the memory configration file of the testcase.
