@@ -73,10 +73,12 @@ compile: $(RAZZLE_DIR)
 
 analysis:
 	cd $(RAZZLE_DIR); \
-	time PYTHONPATH=`pwd` python3 razzle/fuzz_analysis.py \
-		-I $(REPO_PATH)/trigger_iter_record \
-		-O $(REPO_PATH)/trigger_analysis.md \
-		--mode trigger
+	time PYTHONPATH=`pwd` python3 razzle/main.py \
+		-I $(RAZZLE_DIR)/config/testcase/mem_init.hjson\
+		-O $(BUILD)\
+		--prefix $(PREFIX)\
+		analysis\
+		--thread_num $(THREAD_NUM)
 
 # draw coverage
 
