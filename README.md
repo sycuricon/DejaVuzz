@@ -43,10 +43,26 @@ make
 make install
 ```
 
-4. Back to the repository root directory, and test the workflow. Argument PREFIX is the prefix of the folder and file of fuzz result.
+5. Back to the repository root directory, and test the workflow. Argument PREFIX is the prefix of the folder and file of fuzz result.
 
 ```bash
 make do-fuzz PREFIX=xxxx
+```
+
+6. Install our customized mill from the mill repository, compile and place the directory in your `PATH`.
+
+```bash
+git clone https://github.com/com-lihaoyi/mill.git
+cd mill
+export PATH=$PATH:$(pwd)
+```
+
+7. Back to the repository root directory, and set up Xiangshan
+
+```bash
+git clone https://github.com/sycuricon/xiangshan-dejavuzz.git
+cd xiangshan-dejavuzz
+./generate.sh
 ```
 
 ## Customization
