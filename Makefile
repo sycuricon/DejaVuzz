@@ -5,9 +5,13 @@ BUILD			:= $(TOP)/build
 
 FUZZ_SRC	=	$(SRC)/InstGenerator
 
-TARGET_CORE	=	BOOM
+TARGET_CORE	?=	BOOM
 SIM_MODE	?=	variant
 SIMULATION_LABEL	?= 	swap_mem
+
+ifeq ($(TARGET_CORE),XiangShan)
+    export XS_REPO_DIR = $(TOP)/xiangshan-dejavuzz
+endif
 
 export STARSHIP_CORE = $(TARGET_CORE)
 export SIMULATION_MODE = $(SIM_MODE)
@@ -16,7 +20,7 @@ export STARSHIP_TESTCASE ?= swap_mem.cfg
 PREFIX ?= $(TARGET_CORE)
 THREAD_NUM  ?= 	16
 
-GEN_MODE = gen
+GEN_MODE = gen 
 BASIC_CONFIG = --rtl_sim=$(TOP) --rtl_sim_mode=vcs\
 	--taint_log=$(STARSHIP_DIR)/build/vcs/starship.asic.StarshipSimMiniConfig_$(TARGET_CORE)\
 	--thread_num=$(THREAD_NUM)
@@ -33,6 +37,7 @@ fuzz: $(RAZZLE_DIR) $(STARSHIP_DIR)/build
 		-I $(RAZZLE_DIR)/config/testcase/mem_init.hjson\
 		-O $(BUILD)\
 		--prefix $(PREFIX)\
+		--core $(TARGET_CORE)\
 		$(WORK_MODE)
 
 vcs:
@@ -68,6 +73,7 @@ compile: $(RAZZLE_DIR)
 		-I $(RAZZLE_DIR)/config/testcase/mem_init.hjson\
 		-O $(BUILD)\
 		--prefix $(PREFIX)\
+		--core=$(TARGET_CORE)\
 		compile\
 		--mem_cfg $(STARSHIP_TESTCASE)
 
@@ -77,6 +83,7 @@ analysis:
 		-I $(RAZZLE_DIR)/config/testcase/mem_init.hjson\
 		-O $(BUILD)\
 		--prefix $(PREFIX)\
+		--core=$(TARGET_CORE)\
 		analysis\
 		--thread_num $(THREAD_NUM)
 
