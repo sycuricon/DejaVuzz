@@ -1,31 +1,29 @@
-TOP				:= $(CURDIR)
-STARSHIP_DIR	:= $(TOP)/starship-parafuzz
-RAZZLE_DIR		:= $(TOP)/InstGenerator
-BUILD			:= $(TOP)/build
+ROOT				?= $(CURDIR)
+STARSHIP_DIR		:= $(ROOT)/starship-parafuzz
+RAZZLE_DIR			:= $(ROOT)/InstGenerator
+BUILD				:= $(ROOT)/build
 
-FUZZ_SRC	=	$(SRC)/InstGenerator
-
-TARGET_CORE	?=	BOOM
-SIM_MODE	?=	variant
+TARGET_CORE			?=	BOOM
+SIM_MODE			?=	variant
 SIMULATION_LABEL	?= 	swap_mem
 
 ifeq ($(TARGET_CORE),XiangShan)
-    export XS_REPO_DIR = $(TOP)/xiangshan-dejavuzz
+    export XS_REPO_DIR = $(ROOT)/xiangshan-dejavuzz
 endif
 
 export STARSHIP_CORE = $(TARGET_CORE)
 export SIMULATION_MODE = $(SIM_MODE)
 export STARSHIP_TESTCASE ?= swap_mem.cfg
 
-PREFIX ?= $(TARGET_CORE)
-THREAD_NUM  ?= 	16
+PREFIX 				?= $(TARGET_CORE)
+THREAD_NUM  		?= 16
 
-GEN_MODE = gen 
-BASIC_CONFIG = --rtl_sim=$(TOP) --rtl_sim_mode=vcs\
-	--taint_log=$(STARSHIP_DIR)/build/vcs/starship.asic.StarshipSimMiniConfig_$(TARGET_CORE)\
-	--thread_num=$(THREAD_NUM)
-FUZZ_MODE = fuzz $(BASIC_CONFIG)
-WORK_MODE = 
+GEN_MODE 			:= gen 
+BASIC_CONFIG 		:= --rtl_sim=$(ROOT) --rtl_sim_mode=vcs	\
+					   --taint_log=$(STARSHIP_DIR)/build/vcs/starship.asic.StarshipSimMiniConfig_$(TARGET_CORE)	\
+					   --thread_num=$(THREAD_NUM)
+FUZZ_MODE 			:= fuzz $(BASIC_CONFIG)
+WORK_MODE 			:= 
 
 do-gen: 	WORK_MODE += $(GEN_MODE)
 do-fuzz: 	WORK_MODE += $(FUZZ_MODE)
@@ -33,11 +31,9 @@ do-fuzz: 	WORK_MODE += $(FUZZ_MODE)
 fuzz: $(RAZZLE_DIR) $(STARSHIP_DIR)/build
 	mkdir -p $(BUILD)
 	cd $(RAZZLE_DIR); \
-	time PYTHONPATH=`pwd` python3 razzle/main.py\
-		-I $(RAZZLE_DIR)/config/testcase/mem_init.hjson\
-		-O $(BUILD)\
-		--prefix $(PREFIX)\
-		--core $(TARGET_CORE)\
+	time PYTHONPATH=`pwd` python3 razzle/main.py				\
+		-I $(RAZZLE_DIR)/config/testcase/mem_init.hjson			\
+		-O $(BUILD) --prefix $(PREFIX) --core $(TARGET_CORE)	\
 		$(WORK_MODE)
 
 vcs:
@@ -69,23 +65,17 @@ REPO_PATH = $(BUILD)/$(PREFIX).template_repo
 
 compile: $(RAZZLE_DIR)
 	cd $(RAZZLE_DIR); \
-	PYTHONPATH=`pwd` python3 razzle/main.py\
-		-I $(RAZZLE_DIR)/config/testcase/mem_init.hjson\
-		-O $(BUILD)\
-		--prefix $(PREFIX)\
-		--core=$(TARGET_CORE)\
-		compile\
-		--mem_cfg $(STARSHIP_TESTCASE)
+	PYTHONPATH=`pwd` python3 razzle/main.py						\
+		-I $(RAZZLE_DIR)/config/testcase/mem_init.hjson			\
+		-O $(BUILD) --prefix $(PREFIX) --core=$(TARGET_CORE)	\
+		compile --mem_cfg $(STARSHIP_TESTCASE)
 
 analysis:
 	cd $(RAZZLE_DIR); \
-	time PYTHONPATH=`pwd` python3 razzle/main.py \
-		-I $(RAZZLE_DIR)/config/testcase/mem_init.hjson\
-		-O $(BUILD)\
-		--prefix $(PREFIX)\
-		--core=$(TARGET_CORE)\
-		analysis\
-		--thread_num $(THREAD_NUM)
+	time PYTHONPATH=`pwd` python3 razzle/main.py 				\
+		-I $(RAZZLE_DIR)/config/testcase/mem_init.hjson			\
+		-O $(BUILD) --prefix $(PREFIX) --core=$(TARGET_CORE)	\
+		analysis --thread_num $(THREAD_NUM)
 
 # draw coverage
 
@@ -94,7 +84,7 @@ cov_draw_iter:	WORK_MODE += -m iter
 
 cov_draw:
 	cd $(RAZZLE_DIR); \
-	time PYTHONPATH=`pwd` python3 razzle/coverage_draw.py \
+	time PYTHONPATH=`pwd` python3 razzle/coverage_draw.py		\
 		-I $(REPO_PATH)/fuzz.log $(WORK_MODE)
 
 cov_draw_iter: 	cov_draw
