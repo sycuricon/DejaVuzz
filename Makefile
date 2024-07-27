@@ -1,7 +1,9 @@
 ROOT				?= $(CURDIR)
 STARSHIP_DIR		:= $(ROOT)/starship-parafuzz
 RAZZLE_DIR			:= $(ROOT)/InstGenerator
+REGRESS_DIR			:= $(ROOT)/riscv-tests-parafuzz
 BUILD				:= $(ROOT)/build
+REPO_PATH 			:= $(BUILD)/$(PREFIX).template_repo
 
 TARGET_CORE			?=	BOOM
 SIM_MODE			?=	variant
@@ -47,6 +49,10 @@ do-fuzz:	fuzz
 
 # other
 
+# todo: replace this with the real target binary
+vcs-dummy:
+	make -C $(STARSHIP_DIR) vcs-dummy
+
 vcs-debug:
 	make -C $(STARSHIP_DIR) vcs-debug
 
@@ -60,9 +66,6 @@ sim:
 	$(STARSHIP_DIR)/build/spike/spike --log=./log --log-commits -l -d $(STARSHIP_TESTCASE)
 
 # utils
-
-REPO_PATH = $(BUILD)/$(PREFIX).template_repo
-
 compile: $(RAZZLE_DIR)
 	cd $(RAZZLE_DIR); \
 	PYTHONPATH=`pwd` python3 razzle/main.py						\
@@ -78,7 +81,6 @@ analysis:
 		analysis --thread_num $(THREAD_NUM)
 
 # draw coverage
-
 cov_draw_time:	WORK_MODE += -m time
 cov_draw_iter:	WORK_MODE += -m iter
 
@@ -89,3 +91,29 @@ cov_draw:
 
 cov_draw_iter: 	cov_draw
 cov_draw_time:	cov_draw
+
+# regress test
+
+REGRESS_TARGET	:=	spectre-v1			\
+					spectre-v2			\
+					spectre-v3			\
+					spectre-v4			\
+					spectre-rsb			\
+					spectre-mds			\
+					spectre-rewind		\
+					spectre-frozen		\
+					spectre-ctrl-failed	\
+					spectre-specret		\
+					spectre-speccall
+
+regress: vcs-dummy
+	mkdir -p $(BUILD)/regress
+	for guess in 100 101; do \
+		for target in $(REGRESS_TARGET); do \
+        	python3 scripts/gen_cfg.py \
+                --dut_init_file $(REGRESS_DIR)/build/benchmarks/$${target}.guess$${guess}.riscv.bin \
+                --vnt_init_file $(REGRESS_DIR)/build/benchmarks/$${target}.guess$${guess}.riscv.variant.bin \
+                --output_file $(BUILD)/regress/$${target}.$${guess}.cfg ;	\
+			make -C $(STARSHIP_DIR) vcs STARSHIP_TESTCASE=$(BUILD)/regress/$${target}.$${guess}.cfg SIMULATION_LABEL=$${target}.$${guess} & \
+		done; \
+	done
