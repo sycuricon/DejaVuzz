@@ -28,7 +28,9 @@ FUZZ_MODE 			:= fuzz $(BASIC_CONFIG)
 WORK_MODE 			:= 
 
 do-gen: 	WORK_MODE += $(GEN_MODE)
-do-fuzz: 	WORK_MODE += $(FUZZ_MODE)
+do-fuzz: 	WORK_MODE += $(FUZZ_MODE) --fuzz_mode=leak
+do-fuzz-trigger:	WORK_MODE += $(FUZZ_MODE) --fuzz_mode=trigger
+do-fuzz-access:		WORK_MODE += $(FUZZ_MODE) --fuzz_mode=access
 
 fuzz: $(RAZZLE_DIR) $(STARSHIP_DIR)/build
 	mkdir -p $(BUILD)
@@ -46,6 +48,8 @@ vcs-wave:
 
 do-gen: 	fuzz
 do-fuzz:	fuzz
+do-fuzz-trigger:	fuzz
+do-fuzz-access:		fuzz
 
 # other
 
