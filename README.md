@@ -38,7 +38,7 @@ make patch
 ```bash
 git clone https://github.com/sycuricon/riscv-isa-cosim.git
 cd riscv-isa-cosim
-autoconf
+./configure
 make
 make install
 ```
