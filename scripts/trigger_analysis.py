@@ -183,7 +183,7 @@ with open('trigger_statstic.md', 'wt') as file:
     file.write('\\hline\n')
     file.write('\\multirow{2}{1cm}{type} &')
     for entry in table_entry:
-        file.write(f' \\multicolumn{{2}}{{c}}{{{entry}}} &')
+        file.write(f' \\multicolumn{{2}}{{c|}}{{{entry}}} &')
     file.write('\\multirow{2}{1cm}{overhead} \\\\\n')
     file.write(f'\\cline{{{2}-{1+2*len(table_entry)}}}\n')
 
