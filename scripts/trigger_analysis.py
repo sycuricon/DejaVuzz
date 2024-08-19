@@ -116,7 +116,7 @@ prefix_list = [
     'trigger_test_03',
     'trigger_test_04',
 ]
-final_table['BOOM-I'] = trigger_analysis(build_path, target_core, prefix_list)
+final_table['BOOM*'] = trigger_analysis(build_path, target_core, prefix_list)
 
 prefix_list = [
     'unalign_trigger_test_00',
@@ -124,7 +124,7 @@ prefix_list = [
     'unalign_trigger_test_02',
     'unalign_trigger_test_03',
 ]
-final_table['BOOM-II'] = trigger_analysis(build_path, target_core, prefix_list)
+final_table['BOOM-unalign'] = trigger_analysis(build_path, target_core, prefix_list)
 
 prefix_list = [
     'random_trigger_test_00',
@@ -132,7 +132,7 @@ prefix_list = [
     'random_trigger_test_02',
     'random_trigger_test_03',
 ]
-final_table['BOOM-III'] = trigger_analysis(build_path, target_core, prefix_list)
+final_table['BOOM-random'] = trigger_analysis(build_path, target_core, prefix_list)
 
 target_core = 'XiangShan'
 prefix_list = [
@@ -141,7 +141,7 @@ prefix_list = [
     'trigger_test_02',
     'trigger_test_03',
 ]
-final_table['XiangShan-I'] = trigger_analysis(build_path, target_core, prefix_list)
+final_table['XiangShan*'] = trigger_analysis(build_path, target_core, prefix_list)
 
 prefix_list = [
     'unalign_trigger_test_00',
@@ -149,7 +149,7 @@ prefix_list = [
     'unalign_trigger_test_02',
     'unalign_trigger_test_03',
 ]
-final_table['XiangShan-II'] = trigger_analysis(build_path, target_core, prefix_list)
+final_table['XiangShan-unalign'] = trigger_analysis(build_path, target_core, prefix_list)
 
 prefix_list = [
     'random_trigger_test_00',
@@ -157,7 +157,7 @@ prefix_list = [
     'random_trigger_test_02',
     'random_trigger_test_03',
 ]
-final_table['XiangShan-III'] = trigger_analysis(build_path, target_core, prefix_list)
+final_table['XiangShan-random'] = trigger_analysis(build_path, target_core, prefix_list)
 
 table_entry = [
         'access fault',
@@ -170,18 +170,26 @@ table_entry = [
         'return address mispredict',
     ]
 with open('trigger_statstic.md', 'wt') as file:
-    file.write('|type|')
+    file.write('\\begin{table}[h]\n')
+    file.write('\\centering')
+    file.write('\\caption{Evaluation for Trigger Stage}\n')
+    file.write('\\label{table1}\n')
+    file.write('\\begin{tabular}{')
+    for _ in range(1 + 2*len(table_entry) + 1):
+        file.write('|c')
+    file.write('|}\n')
+    file.write('\\multirow{2}{1cm}{type} &')
     for entry in table_entry:
-        file.write(f'{entry}|')
-    file.write('overhead|\n')
-    
-    file.write('|')
-    for _ in range(len(table_entry)+2):
-        file.write('----|')
-    file.write('\n')
+        file.write(f' \\multicolumn{{2}}{{c}}{{{entry}}} &')
+    file.write('\\multirow{2}{1cm}{overhead} \\\\\n')
+
+    file.write('&')
+    for entry in table_entry:
+        file.write(f' S & O &')
+    file.write('\\\\\n')
 
     for trigger_type, sub_table in final_table.items():
-        file.write(f'|{trigger_type}|')
+        file.write(f'{trigger_type} & ')
         line_num_sum = 0
         valid_num_sum = 0
         case_num = 0
@@ -191,6 +199,9 @@ with open('trigger_statstic.md', 'wt') as file:
             line_num_sum += line_num
             valid_num_sum += valid_num
             case_num += 1
-            file.write(f"{round(sub_table[entry]['success_rate']*100, 2)}%/{line_num}({valid_num})|")
-        file.write(f"{round(line_num_sum/case_num,2)}({round(valid_num_sum/case_num,2)})|\n")
+            file.write(f"{round(sub_table[entry]['success_rate']*100, 2)}\% & {line_num}({valid_num}) &")
+        file.write(f"{round(line_num_sum/case_num,2)}({round(valid_num_sum/case_num,2)}) \\\\\n")
+
+    file.write('\\end{tabular}\n')
+    file.write('\\end{table}')
         
