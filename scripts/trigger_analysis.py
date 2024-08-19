@@ -170,23 +170,28 @@ table_entry = [
         'return address mispredict',
     ]
 with open('trigger_statstic.md', 'wt') as file:
-    file.write('\\begin{table}[h]\n')
+    file.write('\\begin{table*}[h]\n')
     file.write('\\centering')
     file.write('\\caption{Evaluation for Trigger Stage}\n')
     file.write('\\label{table1}\n')
+    file.write('\\resizebox{\\textwidth}{!}{\n')
     file.write('\\begin{tabular}{')
     for _ in range(1 + 2*len(table_entry) + 1):
         file.write('|c')
     file.write('|}\n')
+
+    file.write('\\hline\n')
     file.write('\\multirow{2}{1cm}{type} &')
     for entry in table_entry:
         file.write(f' \\multicolumn{{2}}{{c}}{{{entry}}} &')
     file.write('\\multirow{2}{1cm}{overhead} \\\\\n')
+    file.write(f'\\cline{{{2}-{1+2*len(table_entry)}}}\n')
 
     file.write('&')
     for entry in table_entry:
         file.write(f' S & O &')
     file.write('\\\\\n')
+    file.write('\\hline\n')
 
     for trigger_type, sub_table in final_table.items():
         file.write(f'{trigger_type} & ')
@@ -194,14 +199,16 @@ with open('trigger_statstic.md', 'wt') as file:
         valid_num_sum = 0
         case_num = 0
         for entry in table_entry:
-            line_num = round(sub_table[entry]['ave_line_num'], 2)
+            line_num = round(sub_table[entry]['ave_line_num'], 1)
             valid_num = round(sub_table[entry]['ave_valid_num'], 2)
             line_num_sum += line_num
             valid_num_sum += valid_num
             case_num += 1
-            file.write(f"{round(sub_table[entry]['success_rate']*100, 2)}\% & {line_num}({valid_num}) &")
-        file.write(f"{round(line_num_sum/case_num,2)}({round(valid_num_sum/case_num,2)}) \\\\\n")
+            file.write(f"{round(sub_table[entry]['success_rate']*100, 1)}\% & {line_num}({valid_num}) &")
+        file.write(f"{round(line_num_sum/case_num,1)}({round(valid_num_sum/case_num,2)}) \\\\\n")
+    file.write('\\hline\n')
 
     file.write('\\end{tabular}\n')
-    file.write('\\end{table}')
+    file.write('}\n')
+    file.write('\\end{table*}')
         
