@@ -1,6 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import coverage_analysis
 
 def get_file_list(dirname):
     def get_index(filename):
@@ -49,6 +50,16 @@ def get_curve(file_in_dir, index):
             file.write(f'{num} {contr} {filename}\n')
     return curve
 
+def draw_plot(cov_list, label):
+    cov_list = np.array(cov_list).T
+    ave_list = np.mean(cov_list, axis=1).T
+    std_list = np.std(cov_list, axis=1).T
+
+    ci = std_list * 1.96
+    ci[ave_list - ci < 0] = ave_list[ave_list - ci < 0]
+    plt.plot(ave_list, label=label)
+    plt.errorbar(range(20000)[::1250], ave_list[::1250], yerr=ci[::1250], fmt='o')
+
 if not os.path.exists('./spec_coverage'):
     os.mkdir('./spec_coverage')
 
@@ -67,24 +78,18 @@ legend = [
     'S2M_VICTIM',
 ]
 file_in_dir_list = [get_file_list(filename)[:20000] for filename in cov_dir]
-file_cross_list = [[0 for i in range(20000)] for j in range(5)]
-for i in range(5):
-    for j in range(5):
-        file_cross_list[i][j::5] = file_in_dir_list[j][i::5]
-file_in_dir_list = file_cross_list
-cov_list = [get_curve(file_in_dir, i)[:20000] for i, file_in_dir in enumerate(file_in_dir_list)][1:]
+# file_cross_list = [[0 for i in range(20000)] for j in range(5)]
+# for i in range(5):
+#     for j in range(5):
+#         file_cross_list[i][j*4000:j*4000+4000] = file_in_dir_list[j][i*4000:i*4000+4000]
+# file_in_dir_list = file_cross_list
+curve_list = [get_curve(file_in_dir, i)[:20000] for i, file_in_dir in enumerate(file_in_dir_list)]
 
-for cov, leg in zip(cov_list, legend):
-    plt.plot(cov, label = leg)
-    pass
+# for cov, leg in zip(curve_list, legend):
+#     plt.plot(cov, label = leg)
+#     pass
+draw_plot(curve_list[0:3], label='spec_attack')
+draw_plot(curve_list[3:5], label='spec_victim')
 
-cov_list = np.array(cov_list).T
-ave_list = np.mean(cov_list, axis=1).T
-std_list = np.std(cov_list, axis=1).T
-
-ci = std_list * 1.96
-plt.plot(ave_list, color='black')
-plt.errorbar(range(20000)[::1250], ave_list[::1250], yerr=ci[::1250], fmt='o')
-
-plt.legend()
+plt.legend(bbox_to_anchor=(1,0.75))
 plt.savefig('./spec_coverage/spec_cov.png')
