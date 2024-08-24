@@ -1,0 +1,101 @@
+import argparse
+import os
+import threading
+import libconf
+import time
+
+def system_call(string):
+    print(string)
+    for i in range(3):
+        if os.system(string) != 0:
+            time.sleep(10)
+        else:
+            return
+    else:
+        raise Exception('cannot handle this system call by delay')
+
+def testcase_run(file_name, output_name, index, log_index, log_path):
+    cur_path = os.path.abspath(os.curdir)
+
+    dut_file_name = file_name
+    dut_file_bin = os.path.join(cur_path, f'dut_{index}.bin')
+    vnt_file_name = file_name.replace('s1', 's0')
+    vnt_file_bin = os.path.join(cur_path, f'vnt_{index}.bin')
+    system_call(f'riscv64-unknown-elf-objcopy -O binary {dut_file_name} {dut_file_bin}')
+    system_call(f'riscv64-unknown-elf-objcopy -O binary {vnt_file_name} {vnt_file_bin}')
+
+    variant_template = {
+        'start_addr': libconf.LibconfInt64(0x8000_0000),
+        'max_mem_size': libconf.LibconfInt64(0x8000_0000),
+        'memory_regions': (
+            {
+                'type': 'dut',
+                'start_addr': libconf.LibconfInt64(0x8000_0000),
+                'max_len': libconf.LibconfInt64(0x8000_0000),
+                'init_file': dut_file_bin,
+            },
+            {
+                'type': 'vnt',
+                'start_addr': libconf.LibconfInt64(0x8000_0000),
+                'max_len': libconf.LibconfInt64(0x8000_0000),
+                'init_file': vnt_file_bin,
+            }
+        )
+    }
+    
+    config_name = os.path.join(cur_path, f'spec_{index}.cfg')
+    with open(config_name, 'wt') as file:
+        libconf.dump(variant_template, file)
+
+    system_call(f'make vcs STARSHIP_TESTCASE={config_name} SIMULATION_LABEL=spec_{index}')
+    cov_name = os.path.join(log_path, f'spec_{index}.taint.cov')
+    system_call(f'cp {cov_name} {output_name}/{log_index}.taint.cov')
+    
+
+def spec_fuzz(dirname, output_name, thread_num, log_path, start):
+    thread_num = int(thread_num)
+    start = int(start)
+    if not os.path.exists(output_name):
+        os.mkdir(output_name)
+    raw_dir_list = os.listdir(dirname)
+    dir_list = []
+    for file in raw_dir_list:
+        if file.endswith('s0.riscv') and file.startswith('.t3'):
+            dir_list.append(file)
+
+    index = start
+    log_index = start
+    while index < len(dir_list):
+        file_name_list = []
+        for i in range(thread_num):
+            if index >= len(dir_list):
+                break
+            file_name = os.path.join(dirname, dir_list[index])
+            index += 1
+            file_name_list.append(file_name)
+
+        thread_list = []
+        coverage_list = []
+        for i,file_name in enumerate(file_name_list):
+            thread = threading.Thread(target=testcase_run, args=(file_name, output_name, i, log_index, log_path))
+            log_index += 1
+            thread.start()
+            thread_list.append(thread)
+        for thread in thread_list:
+            thread.join()
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-I", "--input", dest="input", required=True, help="dirname of the testcase from specdoctor")
+parser.add_argument("-O", "--output", dest="output", required=True, help="dirname to store the coverage of the specdoctor")
+parser.add_argument("--thread", dest="thread", required=True, help="the number of thread to fuzz testcase")
+parser.add_argument("--log_path", dest="log_path", required=True, help="the log path of the fuzz")
+parser.add_argument("--start", dest="start", required=True, help="the index beginning to fuzz")
+
+
+args = parser.parse_args()
+spec_fuzz(args.input, args.output, args.thread, args.log_path, args.start)
+
+
+
+
