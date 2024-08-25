@@ -159,42 +159,34 @@ prefix_list = [
 ]
 final_table['XiangShan-random'] = trigger_analysis(build_path, target_core, prefix_list)
 
-table_entry = [
-        'access fault',
-        'page fault',
-        'illegal',
-        'misalign',
-        'load store bypass',
-        'branch mispredict',
-        'indirect jump mispredict',
-        'return address mispredict',
-    ]
-with open('trigger_statstic.md', 'wt') as file:
-    file.write('\\begin{table*}[h]\n')
-    file.write('\\centering')
-    file.write('\\caption{Evaluation for Trigger Stage}\n')
-    file.write('\\label{table1}\n')
-    file.write('\\resizebox{\\textwidth}{!}{\n')
-    file.write('\\begin{tabular}{')
+def draw_table(table_entry, name, file):
+    table_head = """
+    \\begin{subtable}[t]{\\textwidth}
+    \\centering
+    \\resizebox{\\textwidth}{!}{
+    """
+    file.write(table_head)
+
+    file.write('\t\\begin{tabular}{')
     for _ in range(1 + 2*len(table_entry) + 1):
         file.write('|c')
     file.write('|}\n')
 
-    file.write('\\hline\n')
-    file.write('\\multirow{2}{1cm}{type} &')
+    file.write('\t\t\t\\hline\n')
+    file.write('\t\t\t\\multirow{2}{1cm}{type} &')
     for entry in table_entry:
         file.write(f' \\multicolumn{{2}}{{c|}}{{{entry}}} &')
     file.write('\\multirow{2}{1cm}{overhead} \\\\\n')
-    file.write(f'\\cline{{{2}-{1+2*len(table_entry)}}}\n')
+    file.write(f'\t\t\t\\cline{{{2}-{1+2*len(table_entry)}}}\n')
 
-    file.write('&')
+    file.write('\t\t\t&')
     for entry in table_entry:
         file.write(f' S & O &')
     file.write('\\\\\n')
-    file.write('\\hline\n')
+    file.write('\t\t\t\\hline\n')
 
     for trigger_type, sub_table in final_table.items():
-        file.write(f'{trigger_type} & ')
+        file.write(f'\t\t\t{trigger_type} & ')
         line_num_sum = 0
         valid_num_sum = 0
         case_num = 0
@@ -206,9 +198,42 @@ with open('trigger_statstic.md', 'wt') as file:
             case_num += 1
             file.write(f"{round(sub_table[entry]['success_rate']*100, 1)}\% & {line_num}({valid_num}) &")
         file.write(f"{round(line_num_sum/case_num,1)}({round(valid_num_sum/case_num,2)}) \\\\\n")
-    file.write('\\hline\n')
+    file.write('\t\t\t\\hline\n')
 
-    file.write('\\end{tabular}\n')
-    file.write('}\n')
-    file.write('\\end{table*}')
+    file.write('\t\t\\end{tabular}\n')
+    file.write('\t\t}\n')
+    file.write(f'\t\t\\caption{{{name}}}\n')
+    file.write('\t\\end{subtable}\n')
+
+ooo_table_entry = [
+    'access fault',
+    'page fault',
+    'illegal',
+    'misalign',
+    'load store bypass',
+]
+speculate_table_entry = [
+    'branch mispredict',
+    'indirect jump mispredict',
+    'return address mispredict',
+]
+
+file = open('trigger_analysis.md', 'wt')
         
+table_head = """
+\\begin{table*}[h]
+\\centering
+\\caption{Evaluation for Trigger Stage}
+\\label{table1}
+"""
+file.write(table_head)
+
+draw_table(ooo_table_entry, 'table1', file)
+draw_table(speculate_table_entry, 'table2', file)
+
+table_tail = """
+\\end{table*}
+"""
+file.write(table_tail)
+
+file.close()
