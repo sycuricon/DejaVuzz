@@ -1,7 +1,8 @@
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-import coverage_analysis
+import scipy.stats as stats
+
 
 def get_file_list(dirname):
     def get_index(filename):
@@ -51,14 +52,22 @@ def get_curve(file_in_dir, index):
     return curve
 
 def draw_plot(cov_list, label):
-    cov_list = np.array(cov_list).T
-    ave_list = np.mean(cov_list, axis=1).T
-    std_list = np.std(cov_list, axis=1).T
+    ave_list = []
+    upper_list = []
+    lower_list = []
 
-    ci = std_list * 1.96
-    ci[ave_list - ci < 0] = ave_list[ave_list - ci < 0]
+    cov_list = np.array(cov_list).T
+    for data in cov_list:
+        ave = np.mean(data)
+        # data = np.concatenate([data,np.array([ave])])
+        lower, upper = stats.t.interval(confidence=0.95, df=len(data) - 1, loc=ave, scale=stats.sem(data))
+        ave_list.append(ave)
+        upper_list.append(upper)
+        lower_list.append(lower)
+    
     plt.plot(ave_list, label=label)
-    plt.errorbar(range(20000)[::1250], ave_list[::1250], yerr=ci[::1250], fmt='o')
+    print(ave_list[-1])
+    plt.fill_between(range(len(lower_list)), lower_list, upper_list, alpha=0.2)
 
 if not os.path.exists('./spec_coverage'):
     os.mkdir('./spec_coverage')
@@ -69,6 +78,8 @@ cov_dir = [
     './cov_2',
     './cov_3',
     './cov_4',
+    './cov_5',
+    './cov_6',
 ]
 legend = [
     'U2M_ATTACKER', 
@@ -76,20 +87,20 @@ legend = [
     'U2S_ATTACKER',
     'U2S_VICTIM',
     'S2M_VICTIM',
+    'S2M_VICTIM_2',
+    'U2S_VICTIM_2',
 ]
-file_in_dir_list = [get_file_list(filename)[:20000] for filename in cov_dir]
-# file_cross_list = [[0 for i in range(20000)] for j in range(5)]
-# for i in range(5):
-#     for j in range(5):
-#         file_cross_list[i][j*4000:j*4000+4000] = file_in_dir_list[j][i*4000:i*4000+4000]
-# file_in_dir_list = file_cross_list
-curve_list = [get_curve(file_in_dir, i)[:20000] for i, file_in_dir in enumerate(file_in_dir_list)]
+file_in_dir_list = [get_file_list(filename)[:19999] for filename in cov_dir]
+file_cross_list = [[0 for i in range(19999)] for j in range(len(cov_dir))]
+for i in range(len(cov_dir)):
+    for j in range(len(cov_dir)):
+        # file_cross_list[i][j*4000:j*4000+4000] = file_in_dir_list[j][i*4000:i*4000+4000]
+        file_cross_list[i][j:19999:len(cov_dir)] = file_in_dir_list[j][i:19999:len(cov_dir)]
+file_in_dir_list = file_cross_list
+curve_list = [get_curve(file_in_dir, i)[:19999] for i, file_in_dir in enumerate(file_in_dir_list)]
 
-# for cov, leg in zip(curve_list, legend):
-#     plt.plot(cov, label = leg)
-#     pass
-draw_plot(curve_list[0:3], label='spec_attack')
-draw_plot(curve_list[3:5], label='spec_victim')
-
-plt.legend(bbox_to_anchor=(1,0.75))
-plt.savefig('./spec_coverage/spec_cov.png')
+for cov, leg in zip(curve_list, legend):
+    # plt.plot(cov, label = leg)
+    pass
+# draw_plot(curve_list[0:3], label='spec_attack')
+draw_plot(curve_list, label='SpecDoctor')
