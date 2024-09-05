@@ -49,7 +49,9 @@ def testcase_run(file_name, output_name, index, log_index, log_path):
 
     system_call(f'make vcs STARSHIP_TESTCASE={config_name} SIMULATION_LABEL=spec_{index}')
     cov_name = os.path.join(log_path, f'spec_{index}.taint.cov')
+    live_name = os.path.join(log_path, f'spec_{index}.taint.live')
     system_call(f'cp {cov_name} {output_name}/{log_index}.taint.cov')
+    system_call(f'cp {live_name} {output_name}/{log_index}.taint.live')
     
 
 def spec_fuzz(dirname, output_name, thread_num, log_path, start):
