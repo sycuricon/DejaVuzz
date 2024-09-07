@@ -2,9 +2,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import scipy.stats as stats
+import math
 
 
-def get_file_list(dirname):
+def get_file_list(dirname, end='.cov'):
     def get_index(filename):
         index = filename.split('.')[0]
         try:
@@ -15,7 +16,7 @@ def get_file_list(dirname):
 
     file_in_dir = os.listdir(dirname)
     file_in_dir.sort(key=get_index)
-    path_in_dir = [os.path.join(dirname, file) for file in file_in_dir if file.endswith('.cov')]
+    path_in_dir = [os.path.join(dirname, file) for file in file_in_dir if file.endswith(end)]
     return path_in_dir
 
 def spec_get_curve(file_in_dir, index):
@@ -50,6 +51,27 @@ def spec_get_curve(file_in_dir, index):
         for num, contr,filename in zip(cov_num, cov_contr, file_list):
             file.write(f'{num} {contr} {filename}\n')
     return curve
+
+def spec_get_liveness(folder_list):
+    liveness_record = {}
+    for file_list in folder_list:
+        for file in file_list:
+            dcache_can_record = True
+            for line in open(file):
+                line = line.strip()
+                name, value = line.split()
+                name = list(name.split('.'))
+                name = '.'.join(name[5:-2])
+                if 'dcache' in name:
+                    if dcache_can_record:
+                        liveness_record[name] = liveness_record.get(name, 0) + 1
+                    dcache_can_record = True
+                else:
+                    liveness_record[name] = liveness_record.get(name, 0) + 1
+                
+    with open('./spec_coverage/spec_dejavuzz_liveness', "wt") as file:
+        for comp, value in liveness_record.items():
+            file.write(f'{comp}\t{value}\n')
 
 def draw_plot(cov_list, label):
     ave_list = []
@@ -158,6 +180,9 @@ for cov, leg in zip(curve_list, legend):
 # draw_plot(curve_list[0:3], label='spec_attack')
 draw_plot(curve_list, label='SpecDoctor')
 
+file_in_dir_list = [get_file_list(filename, '.live')[:file_len] for filename in cov_dir]
+spec_get_liveness(file_in_dir_list)
+
 leak_list = [
     # './coverage/leak_00_curve',
     # './coverage/leak_01_curve',
@@ -166,6 +191,13 @@ leak_list = [
     './coverage/leak_04_curve',
     './coverage/leak_05_curve',
     './coverage/leak_08_curve',
+]
+live_list = [
+    './coverage/leak_02_liveness',
+    './coverage/leak_03_liveness',
+    './coverage/leak_04_liveness',
+    './coverage/leak_05_liveness',
+    './coverage/leak_08_liveness',
 ]
 
 cov_list = [dejavuzz_get_curve(leak_file)[:20000] for leak_file in leak_list]
@@ -179,7 +211,84 @@ plt.legend(bbox_to_anchor=(1,0.4))
 plt.axis([0, 20000, 0, 5000])
 plt.xlabel('Iteration', fontsize=13)
 plt.ylabel('Coverage', fontsize=13)
-plt.savefig('./spec_coverage/spec_cov.pdf')
 
 plt.subplot(2,1,2)
+
+keymap = [
+        ('tage','tage'),
+        ('dtlb','dtlb'),
+        ('lsu','lsu'),
+        ('mshr','mshr'),
+        ('dcache','dcache'),
+        ('icache','icache'),
+        ('btb','btb'),
+        ('ubtb','btb'),
+        ('loop','loop'),
+        ('regfile','regfile'),
+        ('BoomProbeUnit','other'),
+        ('rob','rob'),
+        ('fb','ftq'),
+        ('ftq','ftq'),
+        ('f3','ftq'),
+        ('f4','ftq'),
+        ('FetchTargetQueue','ftq'),
+        ('Rename','rename'),
+        ('freelist','rename'),
+        ('Issue','issue'),
+        ('bim','bim'),
+        ('ras','ras'),
+        ('LSU', 'lsu'),
+        ('L1MetadataArray', 'dcache'),
+        ('BoomMSHR', 'mshr'),
+        ('ICache', 'icache'),
+        ('BoomRAS', 'ras'),
+    ]
+
+
+def collect_taint(file_list, keymap):    
+    def collect_one_file(file, comp_dict):
+        for line in open(file):
+            line = line.strip()
+            comp_name, value = line.split()
+            for key, comp_class in keymap:
+                if key in comp_name:
+                    comp_dict[comp_class] = comp_dict.get(comp_class, 0) + int(value)
+                    break
+            else:
+                comp_class = 'other'
+                comp_dict[comp_class] = comp_dict.get(comp_class, 0) + int(value)
+        return comp_dict
+    
+    comp_dict = {}
+    for file in file_list:
+        comp_dict = collect_one_file(file, comp_dict)
+    return comp_dict
+
+spec_deja_dict = collect_taint(['./spec_coverage/spec_dejavuzz_liveness'], keymap)
+# deja_dict = collect_taint(live_list, keymap)
+spec_dict = collect_taint(['./spec_coverage/spec_liveness'], keymap)
+print(spec_deja_dict)
+# print(deja_dict)
+print(spec_dict)
+
+label_array = set(pair[1] for pair in keymap)
+delete_label = set()
+for label in label_array:
+    if spec_deja_dict.get(label, 0) == 0 and spec_dict.get(label, 0) == 0:
+        delete_label.add(label)
+label_array = list(label_array - delete_label)
+data_spec_deja = [spec_deja_dict.get(label, 1) for label in label_array]
+# data_deja = [deja_dict.get(label, 1) for label in label_array]
+data_spec = [spec_dict.get(label, 1) for label in label_array]
+width = 0.7
+xpos = np.arange(0,2*len(label_array),2)
+# bars1 = plt.bar(xpos-width, data_deja, align='center', width=width, alpha=0.9, color='#1f77b4', label = 'dejavuzz')
+bars2 = plt.bar(xpos-width/2, data_spec, align='center', width=width, alpha=0.9, color='#2ca02c', label = 'specdoctor')
+bars3 = plt.bar(xpos+width/2, data_spec_deja, align='center', width=width, alpha=0.9, color='#ff7f0e', label = 'spec_dejavuzz')
+
+plt.xticks(ticks=xpos,labels=label_array,rotation=60, ha='right') 
+# plt.yscale('log')
+plt.legend()
+
+plt.savefig('./spec_coverage/spec_cov.pdf')
 
