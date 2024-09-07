@@ -56,19 +56,59 @@ def spec_get_liveness(folder_list):
     liveness_record = {}
     for file_list in folder_list:
         for file in file_list:
-            dcache_can_record = True
+            log_name = file.replace('.live', '.log')
+            texe_begin = 0
+            for line in open(log_name):
+                time, label, _, _ = line.strip().split(',')
+                if label.strip() == 'SPEC_BEGIN_ATTACH':
+                    texe_begin = int(time)
+            if texe_begin == 0:
+                raise Exception(f'no SPEC_BEGIN_ATTACH label in {file}')
+            
+            taint_list = []
+            csv_name = file.replace('.live', '.csv')
+            is_title = True
+            for line in open(csv_name):
+                if is_title:
+                    is_title = False
+                    continue
+                time, taint_num, _ = line.strip().split(',')
+                taint_num = int(taint_num.strip())
+                taint_list.append(taint_num)
+            
+            comp_dict = {}
+            dcache_dict = []
             for line in open(file):
-                line = line.strip()
-                name, value = line.split()
-                name = list(name.split('.'))
-                name = '.'.join(name[5:-2])
-                if 'dcache' in name:
-                    if dcache_can_record:
-                        liveness_record[name] = liveness_record.get(name, 0) + 1
-                    dcache_can_record = True
+                comp, value = line.strip().split(':')
+                comp = '.'.join(comp.strip().split('.')[5:-2])
+                value = int(value)
+                if 'dcache' in comp:
+                    dcache_dict.append([comp, value])
                 else:
-                    liveness_record[name] = liveness_record.get(name, 0) + 1
-                
+                    comp_dict[comp] = value
+
+            if taint_list[texe_begin] > 0:
+                value = taint_list[texe_begin]
+                for index in range(len(dcache_dict)):
+                    if value == 0:
+                        break
+                    elif value >= dcache_dict[index][1]:
+                        value -= dcache_dict[index][1]
+                    else:
+                        dcache_dict[index][1] -= value
+                        break
+                else:
+                    index = -1
+            else:
+                index = 1
+            for comp, value in dcache_dict[index:-1]:
+                comp_dict[comp] = value
+                print(file)
+                break
+        
+            for comp in comp_dict.keys():
+                liveness_record[comp] = liveness_record.get(comp, 0) + 1
+
     with open('./spec_coverage/spec_dejavuzz_liveness', "wt") as file:
         for comp, value in liveness_record.items():
             file.write(f'{comp}\t{value}\n')
@@ -180,9 +220,6 @@ for cov, leg in zip(curve_list, legend):
 # draw_plot(curve_list[0:3], label='spec_attack')
 draw_plot(curve_list, label='SpecDoctor')
 
-file_in_dir_list = [get_file_list(filename, '.live')[:file_len] for filename in cov_dir]
-spec_get_liveness(file_in_dir_list)
-
 leak_list = [
     # './coverage/leak_00_curve',
     # './coverage/leak_01_curve',
@@ -213,6 +250,17 @@ plt.xlabel('Iteration', fontsize=13)
 plt.ylabel('Coverage', fontsize=13)
 
 plt.subplot(2,1,2)
+
+live_dir = [
+    'spec_live_0',
+    'spec_live_1',
+    'spec_live_2',
+    'spec_live_3',
+    'spec_live_4',
+]
+
+file_in_dir_list = [get_file_list(filename, '.live')[:file_len] for filename in live_dir]
+spec_get_liveness(file_in_dir_list)
 
 keymap = [
         ('tage','tage'),

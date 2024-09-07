@@ -55,6 +55,12 @@ def testcase_run(file_name, output_name, index, log_index, log_path, mode):
         case 'live':
             live_name = os.path.join(log_path, f'spec_{index}.taint.live')
             system_call(f'cp {live_name} {output_name}/{log_index}.taint.live')
+            live_name = os.path.join(log_path, f'spec_{index}.taint.csv')
+            system_call(f'cp {live_name} {output_name}/{log_index}.taint.csv')
+            live_name = os.path.join(log_path, f'spec_{index}.taint.log')
+            system_call(f'cp {live_name} {output_name}/{log_index}.taint.log')
+            live_name = os.path.join(log_path, f'spec_{index}.taint.cov')
+            system_call(f'cp {live_name} {output_name}/{log_index}.taint.cov')
             print("live_log", file_name, log_index)
         case _:
             raise Exception('mode must be cov or live')
