@@ -47,12 +47,21 @@ def testcase_run(file_name, output_name, index, log_index, log_path, mode):
     with open(config_name, 'wt') as file:
         libconf.dump(variant_template, file)
 
-    system_call(f'make vcs STARSHIP_TESTCASE={config_name} SIMULATION_LABEL=spec_{index}')
     match mode:
         case 'cov':
+            system_call(f'make vcs STARSHIP_TESTCASE={config_name} SIMULATION_LABEL=spec_{index}')
             cov_name = os.path.join(log_path, f'spec_{index}.taint.cov')
             system_call(f'cp {cov_name} {output_name}/{log_index}.taint.cov')
         case 'live':
+            temp_file = f'.{log_index}_temp'
+            system_call(f'nm {dut_file_name} | grep spdoc > {temp_file}')
+            for line in open(temp_file):
+                addr, _, _ = line.split()
+                addr = int(addr, base=16)
+                break
+            print(addr)
+            system_call(f'rm {temp_file}')
+            system_call(f'make vcs STARSHIP_TESTCASE={config_name} SIMULATION_LABEL=spec_{index} VCS_SPDOC_ADDR={addr}')
             for suffix in ['.live', '.csv', '.log', '.cov']:
                 live_name = os.path.join(log_path, f'spec_{index}.taint{suffix}')
                 system_call(f'cp {live_name} {output_name}/{log_index}.taint{suffix}')
@@ -109,6 +118,9 @@ def spec_fuzz(dirname, output_name, thread_num, log_path, start, mode):
             file_name = os.path.join(dirname, dir_list[index])
             index += 1
             file_name_list.append(file_name)
+        
+        #     print(i, file_name)
+        # continue
 
         thread_list = []
         for i,file_name in enumerate(file_name_list):
