@@ -53,14 +53,13 @@ def testcase_run(file_name, output_name, index, log_index, log_path, mode):
             cov_name = os.path.join(log_path, f'spec_{index}.taint.cov')
             system_call(f'cp {cov_name} {output_name}/{log_index}.taint.cov')
         case 'live':
-            live_name = os.path.join(log_path, f'spec_{index}.taint.live')
-            system_call(f'cp {live_name} {output_name}/{log_index}.taint.live')
-            live_name = os.path.join(log_path, f'spec_{index}.taint.csv')
-            system_call(f'cp {live_name} {output_name}/{log_index}.taint.csv')
-            live_name = os.path.join(log_path, f'spec_{index}.taint.log')
-            system_call(f'cp {live_name} {output_name}/{log_index}.taint.log')
-            live_name = os.path.join(log_path, f'spec_{index}.taint.cov')
-            system_call(f'cp {live_name} {output_name}/{log_index}.taint.cov')
+            for suffix in ['.live', '.csv', '.log', '.cov']:
+                live_name = os.path.join(log_path, f'spec_{index}.taint{suffix}')
+                system_call(f'cp {live_name} {output_name}/{log_index}.taint{suffix}')
+            system_call(f'make vcs STARSHIP_TESTCASE={config_name} SIMULATION_LABEL=spec_{index} VCS_EARLY_EXIT=1')
+            for suffix in ['.live', '.csv', '.log', '.cov']:
+                live_name = os.path.join(log_path, f'spec_{index}.taint{suffix}')
+                system_call(f'cp {live_name} {output_name}/{log_index}.taint{suffix}.early')
             print("live_log", file_name, log_index)
         case _:
             raise Exception('mode must be cov or live')
@@ -97,8 +96,6 @@ def spec_fuzz(dirname, output_name, thread_num, log_path, start, mode):
                         continue
                     elif (int(tokens[8]),int(tokens[13]),int(tokens[14])) in log_index:
                         dir_list.append(f'.t3_input_{tokens[2]}_{tokens[3]}_s0.riscv')
-            # print(dir_list)
-            # exit()
         case _:
             raise Exception('mode must be live or cov')
 
@@ -114,7 +111,6 @@ def spec_fuzz(dirname, output_name, thread_num, log_path, start, mode):
             file_name_list.append(file_name)
 
         thread_list = []
-        coverage_list = []
         for i,file_name in enumerate(file_name_list):
             thread = threading.Thread(target=testcase_run, args=(file_name, output_name, i, log_index, log_path, mode))
             log_index += 1

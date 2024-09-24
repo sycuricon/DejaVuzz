@@ -53,61 +53,36 @@ def spec_get_curve(file_in_dir, index):
     return curve
 
 def spec_get_liveness(folder_list):
+    def get_comp(file):
+        comp_dict = {}
+        for line in open(file):
+            line_token = line.strip().split(':')
+            if len(line_token) == 2:
+                comp, value = line_token
+                comp = '.'.join(comp.strip().split('.')[5:-2])
+            else:
+                comp = line.strip()
+                value = 1 
+                comp = '.'.join(comp.strip().split('.')[5:-1])
+            value = int(value)
+            comp_dict[comp] = value
+        return comp_dict
+
     liveness_record = {}
     for file_list in folder_list:
         for file in file_list:
-            log_name = file.replace('.live', '.log')
-            texe_begin = 0
-            for line in open(log_name):
-                time, label, _, _ = line.strip().split(',')
-                if label.strip() == 'SPEC_BEGIN_ATTACH':
-                    texe_begin = int(time)
-            if texe_begin == 0:
-                raise Exception(f'no SPEC_BEGIN_ATTACH label in {file}')
+            early_file = file.replace('.live', '.live.early')
             
-            taint_list = []
-            csv_name = file.replace('.live', '.csv')
-            is_title = True
-            for line in open(csv_name):
-                if is_title:
-                    is_title = False
-                    continue
-                time, taint_num, _ = line.strip().split(',')
-                taint_num = int(taint_num.strip())
-                taint_list.append(taint_num)
-            
-            comp_dict = {}
-            dcache_dict = []
-            for line in open(file):
-                comp, value = line.strip().split(':')
-                comp = '.'.join(comp.strip().split('.')[5:-2])
-                value = int(value)
-                if 'dcache' in comp:
-                    dcache_dict.append([comp, value])
-                else:
-                    comp_dict[comp] = value
+            comp_dict = get_comp(file)
+            early_comp_dict = get_comp(early_file)
+            print(file)
+            print(comp_dict)
+            print(early_comp_dict)
 
-            if taint_list[texe_begin] > 0:
-                value = taint_list[texe_begin]
-                for index in range(len(dcache_dict)):
-                    if value == 0:
-                        break
-                    elif value >= dcache_dict[index][1]:
-                        value -= dcache_dict[index][1]
-                    else:
-                        dcache_dict[index][1] -= value
-                        break
-                else:
-                    index = -1
-            else:
-                index = 1
-            for comp, value in dcache_dict[index:-1]:
-                comp_dict[comp] = value
-                print(file)
-                break
-        
             for comp in comp_dict.keys():
-                liveness_record[comp] = liveness_record.get(comp, 0) + 1
+                comp_dict[comp] -= early_comp_dict.get(comp, 0)
+                if comp_dict[comp] > 0:
+                    liveness_record[comp] = liveness_record.get(comp, 0) + 1
 
     with open('./spec_coverage/spec_dejavuzz_liveness', "wt") as file:
         for comp, value in liveness_record.items():
