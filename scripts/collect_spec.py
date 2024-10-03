@@ -4,6 +4,7 @@ root_path = '/eda/specdoc-eval'
 spec_path = ['S2M_ATTACKER', 'U2S_ATTACKER', 'U2M_ATTACKER', 'S2M_VICTIM', 'U2S_VICTIM']
 
 liveness_record = {}
+summary = 0
 
 for spec in spec_path:
     path = os.path.join(root_path, spec, 'diff', 'log')
@@ -18,7 +19,9 @@ for spec in spec_path:
             reg_name = line[token_2+1:]
             name = f'{mod_name}.{reg_name}'
             liveness_record[name] = liveness_record.get(name, 0) + 1
+            summary += 1
 
 with open('./spec_coverage/spec_liveness', 'wt') as file:
+    file.write(f'summary {summary}\n')
     for name, value in liveness_record.items():
         file.write(f'{name} {value}\n')
