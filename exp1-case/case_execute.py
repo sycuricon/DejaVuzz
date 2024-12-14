@@ -65,7 +65,6 @@ def traversal_case_execute():
         command = f'make vcs -C {makefile_folder} SIM_MODE={mode} TARGET_CORE={core} STARSHIP_TESTCASE={swap_mem_cfg} SIMULATION_LABEL={prefix}'
         if os.system(command):
             raise Exception(f'{command} fails to execute')
-    exit(0)
 
     leak_case_dataset = os.path.join(case_dataset, 'leak_case')
     leak_case_list = get_case_list(leak_case_dataset)
