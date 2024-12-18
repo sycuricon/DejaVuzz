@@ -29,6 +29,7 @@ git clone https://github.com/sycuricon/starship-parafuzz.git
 cd starship-parafuzz
 git submodule update --init --recursive --progress
 make patch
+make verilog
 ```
 
 > Notice: We dont't need to execute `make verilog-instrument` anymore.
@@ -43,13 +44,7 @@ make
 make install
 ```
 
-5. Back to the repository root directory, and test the workflow. Argument PREFIX is the prefix of the folder and file of fuzz result.
-
-```bash
-make do-fuzz PREFIX=xxxx
-```
-
-6. Install our customized mill from the mill repository, compile and place the directory in your `PATH`.
+5. Install our customized mill from the mill repository, compile and place the directory in your `PATH`.
 
 ```bash
 git clone https://github.com/com-lihaoyi/mill.git
@@ -57,12 +52,19 @@ cd mill
 export PATH=$PATH:$(pwd)
 ```
 
-7. Back to the repository root directory, and set up Xiangshan
+6. Back to the repository root directory, and set up Xiangshan
 
 ```bash
 git clone https://github.com/sycuricon/xiangshan-dejavuzz.git
 cd xiangshan-dejavuzz
+git submodule update --init --recursive --progress
 ./generate.sh
+```
+
+7. Back to the repository root directory, and test the workflow. Argument PREFIX is the prefix of the folder and file of fuzz result.
+
+```bash
+make do-fuzz PREFIX=xxxx
 ```
 
 ## Customization
@@ -76,10 +78,6 @@ execute `make vcs` to simulate a program on the starship.
 execute `make vcs-wave` to dump the wave of the simlution.
 
 execute `make vcs-debug` to dump the commit information of the program execution
-
-execute `make cov_draw_iter` to draw the coverage figure using iteration as x axis
-
-execute `make cov_draw_time` to draw the coverage figure using time as x axis
 
 execute `make compile PREFIX=xxx STARSHIP_TESTCASE=xxx` to compile testcase offline.
 The prefix is the prefix of the domain of the testcase, 
