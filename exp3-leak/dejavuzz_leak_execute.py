@@ -5,10 +5,10 @@ import signal
 import threading
 import subprocess
 
-ITER_NUM = 2
-LEAK_MAX_TIME = 10 * 60
-EXAMINE_INTERVAL = 1 * 30
-TARGET_LEAK_NUM = 31
+ITER_NUM = 5
+LEAK_MAX_TIME = 30 * 60
+EXAMINE_INTERVAL = 1 * 60
+TARGET_LEAK_NUM = 20000
 
 def execute_command(stop_event:threading.Event, command:str, sleep_interval):
     print(command)
