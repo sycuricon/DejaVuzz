@@ -91,7 +91,7 @@ def statstic_type(case_dataset:str, kind_name):
         
 if __name__ == "__main__":
     case_dataset = get_case_dataset()
-    # statstic_type(case_dataset, 'BOOM_trigger_test')
-    # statstic_type(case_dataset, 'BOOM_random_trigger_test')
-    # statstic_type(case_dataset, 'XiangShan_trigger_test')
+    statstic_type(case_dataset, 'BOOM_trigger_test')
+    statstic_type(case_dataset, 'BOOM_random_trigger_test')
+    statstic_type(case_dataset, 'XiangShan_trigger_test')
     statstic_type(case_dataset, 'XiangShan_random_trigger_test')
