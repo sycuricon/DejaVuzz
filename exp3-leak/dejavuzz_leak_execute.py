@@ -5,10 +5,10 @@ import signal
 import threading
 import subprocess
 
-ITER_NUM = 5
-LEAK_MAX_TIME = 30 * 60
-EXAMINE_INTERVAL = 5 * 60
-TARGET_LEAK_NUM = 20000
+ITER_NUM = 2
+LEAK_MAX_TIME = 10 * 60
+EXAMINE_INTERVAL = 1 * 30
+TARGET_LEAK_NUM = 31
 
 def execute_command(stop_event:threading.Event, command:str, sleep_interval):
     print(command)
@@ -17,8 +17,7 @@ def execute_command(stop_event:threading.Event, command:str, sleep_interval):
         if process.poll() is not None:
             break
         time.sleep(sleep_interval)
-    if process.poll() is None:
-        os.killpg(process.pid, signal.SIGTERM)
+    os.killpg(process.pid, signal.SIGTERM)
     print("process terminal")
     time.sleep(1)
 
@@ -42,7 +41,7 @@ def dejavuzz_execute_and_analysis(repo_prefix, group_prefix):
     leak_time_counter = 0
     leak_iter_num = 0
     execute_result = False
-    while True:
+    while fuzz_thread.is_alive():
         time.sleep(EXAMINE_INTERVAL)
         run_time_summary += EXAMINE_INTERVAL
         leak_time_counter += EXAMINE_INTERVAL
