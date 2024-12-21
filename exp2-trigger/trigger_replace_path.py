@@ -38,13 +38,13 @@ def replace_cfg_path(folder_path, thread_num):
             if index >= index_sum:
                 break
             file_name = file_name_list[index]
+            index += 1
             if file_name == 'frame':
                 continue
             case_path = os.path.join(folder_path, file_name)
             if os.path.isfile(case_path):
                 continue
             case_path_list.append(case_path)
-            index += 1
 
         thread_list = []
         for case_path in case_path_list:
