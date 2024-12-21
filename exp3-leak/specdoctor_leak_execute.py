@@ -47,11 +47,8 @@ def specdoctor_casedataset_execute(target_dataset, repo_prefix):
         for i in range(THREAD_NUM):
             if index >= index_sum:
                 break
-            index += 1
             index_list.append(index)
-        
-        #     print(i, file_name)
-        # continue
+            index += 1
 
         thread_list = []
         for file_index in index_list:
