@@ -1,6 +1,6 @@
 import os
 import hjson
-from dejavuzz_trigger_replace_path import *
+from trigger_replace_path import *
 
 trigger_type_list = [
     'load/store access fault', 'load/store page fault', 'load/store misalign', 'illegal instruction',
