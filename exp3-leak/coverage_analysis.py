@@ -139,7 +139,7 @@ if __name__ == "__main__":
             dejavuzz_curve_file_path = os.path.join(folder, dejavuzz_curve_file)
             dejavuzz_curve.append(dejavuzz_get_curve(dejavuzz_curve_file_path))
     dejavuzz_curve_len = min(min([len(curve) for curve in dejavuzz_curve]), CURVE_LEN)
-    dejavuzz_final_curve = [curve[:dejavuzz_curve_len] for curve in dejavuzz_curve]
+    dejavuzz_curve = [curve[:dejavuzz_curve_len] for curve in dejavuzz_curve]
 
     specdoctor_curve = []
     for folder in specdoctor_result_folder_list:
