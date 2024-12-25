@@ -3,7 +3,6 @@ from case_replace import *
 def traversal_case_execute():
     current_file = os.path.abspath(__file__)
     current_folder = os.path.dirname(current_file)
-    makefile_folder = os.path.dirname(current_folder)
 
     case_dataset = get_case_dataset()
     print(f'the path of case_dataset is {case_dataset}')
@@ -17,7 +16,7 @@ def traversal_case_execute():
         prefix = f'trigger_{case_type}'
         core = 'BOOM' if 'boom' in case_type.lower() else 'XiangShan'
         mode = 'robprofile'
-        command = f'make vcs -C {makefile_folder} SIM_MODE={mode} TARGET_CORE={core} STARSHIP_TESTCASE={swap_mem_cfg} SIMULATION_LABEL={prefix}'
+        command = f'make vcs SIM_MODE={mode} TARGET_CORE={core} STARSHIP_TESTCASE={swap_mem_cfg} SIMULATION_LABEL={prefix}'
         if os.system(command):
             raise Exception(f'{command} fails to execute')
 
@@ -30,7 +29,7 @@ def traversal_case_execute():
         prefix = f'leak_{case_type}'
         core = 'BOOM' if 'boom' in case_type.lower() else 'XiangShan'
         mode = 'variant'
-        command = f'make vcs -C {makefile_folder} SIM_MODE={mode} TARGET_CORE={core} STARSHIP_TESTCASE={swap_mem_cfg} SIMULATION_LABEL={prefix}'
+        command = f'make vcs SIM_MODE={mode} TARGET_CORE={core} STARSHIP_TESTCASE={swap_mem_cfg} SIMULATION_LABEL={prefix}'
         os.system(command)
         if os.system(command):
             raise Exception(f'{command} fails to execute')
