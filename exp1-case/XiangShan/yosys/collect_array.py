@@ -33,8 +33,16 @@ def parseVecRegister(file):
                                 if part.isdigit() or part == '':
                                     return '_'.join(parts[:parts.index(part)])
                             return reginfo_pair[0]
+                        def group_by(array_list, key_func):
+                            group_dict = {}
+                            for reginfo_pair in array_list:
+                                key = key_func(reginfo_pair)
+                                group_dict[key] = group_dict.get(key, [])
+                                group_dict[key].append(reginfo_pair)
+                            return group_dict
                         print("[*]", possible_array_list)
-                        for key, group in groupby(possible_array_list, key=extract_key):
+                        group_family = group_by(possible_array_list, extract_key)
+                        for key, group in group_family.items():
                             group_list = list(group)
                             print(key, len(group_list), group_list)
 
