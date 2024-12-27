@@ -6,7 +6,16 @@ Experiment E1 is used to verify the reality of the bug in Table 3 and Table 5.
 
 1. set up the experiment environment following the README in root directory
 
-2. download dataset to exp1-case/case_dataset path.
+2. export `DEJAVUZZ` shell variant to directory of toolchian
+
+```sh
+    export DEJAVUZZ=/path/to/toolchain
+```
+
+You can construct your toolchain by the steps in root directory's README.
+
+3. download dataset to exp1-case/case_dataset path.
+
 ```
 TODO:
 ```
@@ -14,6 +23,7 @@ TODO:
 ## Directory Hierarchy of Dataset
 
 `case_dataset` is the dataset of the vulnerabilities listed in table3 and table5. The final directory hierarchy of the `case_dataset` is as follows:
+
 ```
 .
 ├── leak_case
@@ -78,6 +88,22 @@ For example, the results of `trigger_case/boom_dv_access_fault` in `exp1-case/BO
 * trigger_boom_dv_access_fault.taint.log: the enqueue and dequeue information of label instructions
 
 We can judge the transient execution attack successful or not and analysis the cause of this transient execution attack by above four files.
+
+## Execute one Testcase
+
+if you want to execute one testcase in dataset, you can execute `make vcs` in exp1-case directory.
+
+execute `make vcs` to simulate a program on the starship.
+- Overwrite the `TARGET_CORE` to customize the target core, such as `BOOM` and `XiangShan`, default value is `BOOM`.
+- Overwrite the `SIM_MODE` to customize the simulaton mode, such as `robprofile` and `variant`, default value is `variant`.
+- Overwrite the `SIMULATION_LABEL` to customize the prefix of the file name of the result, default value is `swap_mem`.
+- Overwrite the `STARSHIP_TESTCASE` to customize the simulation program's configure file.
+
+For example, you can execute
+```
+make vcs STARSHIP_TESTCASE=/path/to/testcase/swap_mem.cfg TARGET_CORE=XiangShan SIM_MODE=variant SIMULATION_LABEL=label
+```
+Then testcase will be executed by XiangShan processor in variant mode. The simulation result will be `exp1-case/XiangShan/build/vcs/XiangShan_variant/wave`'s label.taint.cov, label.taint.log, label.taint.csv, label.taint.live.
 
 ## Result Analysis
 
