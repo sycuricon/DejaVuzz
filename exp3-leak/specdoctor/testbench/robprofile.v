@@ -146,9 +146,9 @@ module SyncMonitor (
   endfunction
 
   `ifdef TARGET_BOOM
-    `include "variant/rob_sync.boom.v"
+    `include "rob_sync.boom.v"
   `else // TARGET_XiangShan
-    `include "variant/rob_sync.xiangshan.v"
+    `include "rob_sync.xiangshan.v"
   `endif
 
 endmodule
