@@ -1,14 +1,15 @@
-import random
+import datetime
 import os
 import time
 import signal
 import threading
 import subprocess
 
-ITER_NUM = 5
 LEAK_MAX_TIME = 30 * 60
 EXAMINE_INTERVAL = 1 * 60
 TARGET_LEAK_NUM = 20000
+
+log_file = ""
 
 start_time = time.time()
 
@@ -17,24 +18,24 @@ def record_log(filename, log_string):
     with open(filename, "a+") as file:
         file.write(f'{end_time - start_time}\t{log_string}\n')
 
+def dejavuzz_record_log(log_string):
+    record_log(log_file, log_string)
+
 def execute_command(stop_event:threading.Event, command:str, sleep_interval):
-    # print(command)
     process = subprocess.Popen(command, shell=True, preexec_fn=os.setpgrp)
     while not stop_event.is_set():
         if process.poll() is not None:
+            dejavuzz_record_log('fuzz process died')
             break
         time.sleep(sleep_interval)
-    os.killpg(process.pid, signal.SIGTERM)
-    # print("process terminal")
-    time.sleep(1)
+    if process.poll() is None:
+        os.killpg(process.pid, signal.SIGTERM)
 
 def dejavuzz_execute_and_analysis(repo_prefix, group_prefix):
-    def dejavuzz_record_log(log_string):
-        record_log(log_file, log_string)
-
     current_path = os.path.abspath(__file__)
     current_folder = os.path.dirname(current_path)
     repo_path = os.path.join(current_folder, repo_prefix)
+    global log_file
     log_file = os.path.join(repo_path, 'fuzz.log')
     if not os.path.exists(repo_path):
         os.mkdir(repo_path)
@@ -42,9 +43,9 @@ def dejavuzz_execute_and_analysis(repo_prefix, group_prefix):
         dejavuzz_record_log(f'create {log_file}')
     dejavuzz_record_log(f'fuzz {group_prefix}')
 
-    fuzz_path = os.path.join(current_folder, '..', 'build', f'BOOM_{group_prefix}')
+    fuzz_path = os.path.join(current_folder, 'build', f'BOOM_{group_prefix}')
     assert not os.path.exists(fuzz_path), f"the repo {fuzz_path} has existed, please delete that repo or execute script again"
-    command = f'make -C .. do-fuzz TARGET_CORE=BOOM PREFIX={group_prefix}'
+    command = f'make do-fuzz TARGET_CORE=BOOM PREFIX={group_prefix}'
     stop_event = threading.Event()
     fuzz_thread = threading.Thread(target=execute_command, args=(stop_event, command, EXAMINE_INTERVAL/4))
     fuzz_thread.start()
@@ -80,12 +81,17 @@ def dejavuzz_execute_and_analysis(repo_prefix, group_prefix):
             # print("fuzz success!!!")
             execute_result = True
             break
+    else:
+        dejavuzz_record_log(f"fuzz thread died")
 
     stop_event.set()
+    fuzz_working_flag = os.path.join(current_folder, f'build/BOOM_{group_prefix}/template_repo/fuzz_working_flag')
+    if os.path.exists(fuzz_working_flag):
+        os.system(f'rm {fuzz_working_flag}')
     fuzz_thread.join()
 
     if execute_result:
-        command = f'make -C .. analysis TARGET_CORE=BOOM PREFIX={group_prefix}'
+        command = f'make analysis TARGET_CORE=BOOM PREFIX={group_prefix}'
         assert not os.system(command), f"fails to analysis {group_prefix}"
         from_path = os.path.join(fuzz_path, 'analysis_result', 'full_curve')
         to_path = os.path.join(repo_path, group_prefix)
@@ -96,19 +102,23 @@ def dejavuzz_execute_and_analysis(repo_prefix, group_prefix):
     return execute_result
 
 if __name__ == "__main__":
-    repo_prefix = f'dejavuzz_result_{hex(random.randint(0, 2**32-1))}'
-    # print(f"the dejavuzz coverage info is stored in {repo_prefix}")
+    current_time = datetime.datetime.now()
+    time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
+    repo_prefix = f'dejavuzz_result_{time_str}'
 
-    iter_num = 0
-    while iter_num < ITER_NUM:
-        start = time.time()
-        group_prefix = f'group_{hex(random.randint(0, 2**32-1))}'
-        result = dejavuzz_execute_and_analysis(repo_prefix, group_prefix)
-        end = time.time()
-        time_interval = end - start
-        # print("use time:", time_interval/3600.0, "h")
-        if result:
-            # print("dejavuzz executes successfully")
-            iter_num += 1
-        # else:
-        #     print("dejavuzz executed failed")
+    try:
+        while True:
+            group_prefix = time_str
+            result = dejavuzz_execute_and_analysis(repo_prefix, group_prefix)
+            if result:
+                break
+            current_time = datetime.datetime.now()
+            time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
+    except Exception as e:
+        dejavuzz_record_log('main program died')
+        current_path = os.path.abspath(__file__)
+        current_folder = os.path.dirname(current_path)
+        fuzz_working_flag = os.path.join(current_folder, f'build/BOOM_{group_prefix}/template_repo/fuzz_working_flag')
+        if os.path.exists(fuzz_working_flag):
+            os.system(f'rm {fuzz_working_flag}')
+        raise e
