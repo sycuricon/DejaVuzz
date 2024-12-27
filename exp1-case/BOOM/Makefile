@@ -6,24 +6,60 @@
 TOP		:= $(CURDIR)
 BUILD	:= $(TOP)/build
 
+SIMULATION_MODE 	?= variant
+SIMULATION_LABEL 	?= swap_mem
+STARSHIP_CORE 		?= BOOM
+STARSHIP_TESTCASE 	?= swap_mem.cfg
+
+STARSHIP_TH 	?= starship.asic.TestHarness
+STARSHIP_TOP	?= starship.asic.StarshipSimTop
+STARSHIP_CONFIG	?= starship.asic.StarshipSimMiniConfig
+ROCKET_OUTPUT	:= $(STARSHIP_CORE).$(lastword $(subst ., ,$(STARSHIP_TOP))).$(lastword $(subst ., ,$(STARSHIP_CONFIG)))
+
+SIM_DIR			:= $(TOP)/testbench
+SRC_DIR			:= $(TOP)/vsrc
+TB_TOP			?= Testbench
+
+ifndef DEJAVUZZ
+$(error $$DEJAVUZZ is undefined, please set $$DEJAVUZZ to your dejavuzz-toolchain)
+endif
+
 GCC_VERSION	:= $(word 1, $(subst ., ,$(shell gcc -dumpversion)))
 ifeq ($(shell echo $(GCC_VERSION)\>=10 | bc ),0)
 SCL_PREFIX := source scl_source enable devtoolset-10 &&
 endif
 
+#######################################
+#
+#              Yosys
+#
+#######################################
+
+YOSYS_SRC	:= $(TOP)/yosys
+YOSYS_TOP = $(lastword $(subst ., ,$(STARSHIP_TOP)))
+YOSYS_CONFIG = $(lastword $(subst ., ,$(STARSHIP_CONFIG)))
+export YOSYS_TOP YOSYS_CONFIG
+
+YOSYS_TOP_VERILOG_OPT	:= $(SRC_DIR)/$(ROCKET_OUTPUT).top.opt.v
+YOSYS_TOP_VERILOG_IFT	:= $(SRC_DIR)/$(ROCKET_OUTPUT).top.ift.v
+YOSYS_TOP_VERILOG_VEC	:= $(SRC_DIR)/$(ROCKET_OUTPUT).vec
+
+$(YOSYS_TOP_VERILOG_OPT):
+	$(YOSYS_SRC)/$(STARSHIP_CORE)_vec_collect.sh
+	$(DEJAVUZZ)/bin/yosys -c $(YOSYS_SRC)/$(STARSHIP_CORE)_opt.tcl
+
+$(YOSYS_TOP_VERILOG_IFT): $(YOSYS_TOP_VERILOG_OPT)
+	$(DEJAVUZZ)/bin/yosys -c $(YOSYS_SRC)/$(STARSHIP_CORE)_ift.tcl
+	sed -i "s/.IFT_RULE(\"REPLACE_ME_TO_IFT_RULE\")/.IFT_RULE(IFT_RULE)/g" $(YOSYS_TOP_VERILOG_IFT)
+	sed -i "/module/{:a;N;/);/!ba;s/\(module[^\)]*\));/&\nparameter string IFT_RULE = \"none\";/}" $(YOSYS_TOP_VERILOG_IFT)
+
+#######################################
+#
+#              vcs
+#
+#######################################
+
 all: vcs
-
-SIMULATION_MODE 	?= variant
-SIMULATION_LABEL 	?= swap_mem
-STARSHIP_CORE 		= BOOM
-STARSHIP_TESTCASE 	?= swap_mem.cfg
-
-STARSHIP_TH 	?= starship.asic.TestHarness
-ROCKET_OUTPUT	:= $(STARSHIP_CORE).StarshipSimTop.StarshipSimMiniConfig
-
-SIM_DIR			:= $(TOP)/testbench
-SRC_DIR			:= $(TOP)/vsrc
-TB_TOP			?= Testbench
 
 CHISEL_DEFINE 	:= +define+PRINTF_COND=$(TB_TOP).printf_cond	\
 			   	   +define+STOP_COND=!$(TB_TOP).reset
@@ -101,7 +137,7 @@ VCS_SIM_OPTION	:= +vcs+initreg+0 $(VCS_PARAL_RUN) +testcase=$(STARSHIP_TESTCASE)
 vcs-wave: 		VCS_SIM_OPTION += +dump +uart_tx=0
 vcs-debug: 		VCS_SIM_OPTION += +verbose +uart_tx=0
 
-$(VCS_TARGET): $(SIM_DIR) $(SRC_DIR)
+$(VCS_TARGET): $(VCS_SRC_V) $(VCS_SRC_C)
 	mkdir -p $(VCS_BUILD) $(VCS_LOG) $(VCS_WAVE)
 	cd $(VCS_OUTPUT); vcs $(VCS_OPTION) -l $(VCS_LOG)/vcs.log -top $(TB_TOP) \
 		$(VCS_SRC_V) $(VCS_SRC_C) $(VERILOG_SRC) -o $@
@@ -125,4 +161,4 @@ verdi:
 		-logfile $(VCS_LOG)/verdi.log -top $(TB_TOP) -f $(ROCKET_INCLUDE) $(VCS_SRC_V) &
 
 clean:
-	rm -rf $(BUILD) *log.txt
+	rm -rf $(BUILD) *log.txt $(SRC_DIR)/*.log $(YOSYS_TOP_VERILOG_OPT) $(YOSYS_TOP_VERILOG_IFT) $(YOSYS_TOP_VERILOG_VEC)

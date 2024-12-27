@@ -8,7 +8,7 @@ BUILD	:= $(TOP)/build
 
 SIMULATION_MODE 	?= variant
 SIMULATION_LABEL 	?= swap_mem
-STARSHIP_CORE 		= XiangShan
+STARSHIP_CORE 		?= XiangShan
 STARSHIP_TESTCASE 	?= swap_mem.cfg
 
 STARSHIP_TH 	?= starship.asic.TestHarness
@@ -42,6 +42,7 @@ export YOSYS_TOP YOSYS_CONFIG
 
 YOSYS_TOP_VERILOG_OPT	:= $(SRC_DIR)/$(ROCKET_OUTPUT).top.opt.v
 YOSYS_TOP_VERILOG_IFT	:= $(SRC_DIR)/$(ROCKET_OUTPUT).top.ift.v
+YOSYS_TOP_VERILOG_VEC	:= $(SRC_DIR)/$(ROCKET_OUTPUT).vec
 
 $(YOSYS_TOP_VERILOG_OPT):
 	$(YOSYS_SRC)/$(STARSHIP_CORE)_vec_collect.sh
@@ -161,4 +162,4 @@ verdi:
 		-logfile $(VCS_LOG)/verdi.log -top $(TB_TOP) -f $(ROCKET_INCLUDE) $(VCS_SRC_V) &
 
 clean:
-	rm -rf $(BUILD) *log.txt
+	rm -rf $(BUILD) *log.txt $(SRC_DIR)/*.log $(YOSYS_TOP_VERILOG_OPT) $(YOSYS_TOP_VERILOG_IFT) $(YOSYS_TOP_VERILOG_VEC)
