@@ -1,6 +1,5 @@
 import os
 import time
-import random
 import datetime
 import threading
 
