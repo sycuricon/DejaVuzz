@@ -1,6 +1,7 @@
 import os
 import time
 import random
+import datetime
 import threading
 
 THREAD_NUM = 64
@@ -20,7 +21,7 @@ def specdoctor_case_execute(input_directory, output_directory, wave_directory, i
     swap_cfg_path = os.path.join(input_path, 'spec.cfg')
     cov_name = os.path.join(wave_directory, f'spec_{index%THREAD_NUM}.taint.cov')
     output_path = os.path.join(output_directory, f'{index}.taint.cov')
-    system_call(f'make -C .. vcs STARSHIP_TESTCASE={swap_cfg_path} SIMULATION_LABEL=spec_{index%THREAD_NUM}')
+    system_call(f'make -C specdoctor vcs STARSHIP_TESTCASE={swap_cfg_path} SIMULATION_LABEL=spec_{index%THREAD_NUM} SIMULATION_MODE=variant')
     system_call(f'cp {cov_name} {output_path}')
 
 def specdoctor_casedataset_execute(target_dataset, repo_prefix):
@@ -37,8 +38,8 @@ def specdoctor_casedataset_execute(target_dataset, repo_prefix):
     if not os.path.exists(result_output_path):
         os.mkdir(result_output_path)
 
-    wave_path = os.path.join(current_folder, '..', 'starship-parafuzz',\
-        'build', 'vcs', 'starship.asic.StarshipSimMiniConfig_BOOM_variant', 'wave')
+    wave_path = os.path.join(current_folder, 'specdoctor',\
+        'build', 'vcs', 'BOOM_variant', 'wave')
 
     index_sum = len(os.listdir(case_dataset_path))
     index = 0
@@ -61,7 +62,9 @@ def specdoctor_casedataset_execute(target_dataset, repo_prefix):
 
 
 if __name__ == "__main__":
-    repo_prefix = f'specdoctor_result_{hex(random.randint(0, 2**32-1))}'
+    current_time = datetime.datetime.now()
+    time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
+    repo_prefix = f'specdoctor_result_{time_str}'
 
     target_dataset = [
         'U2M_ATTACKER', 
