@@ -105,12 +105,16 @@ def analysis_and_draw(specdoctor_path, dejavuzz_path):
     specdoctor_curve_len = min(min([len(curve) for curve in specdoctor_curve]), CURVE_LEN)
     specdoctor_curve = [curve[:specdoctor_curve_len] for curve in specdoctor_curve]
 
-    draw_plot(dejavuzz_curve, label='DejaVuzz', color="#2878b5")
+    # draw_plot(dejavuzz_curve, label='DejaVuzz', color="#2878b5")
+    for curve in dejavuzz_curve:
+        plt.plot(curve, label='DejaVuzz', color="#2878b5")
     draw_plot(specdoctor_curve, label='SpecDoctor', color="#ffbe7a")
 
+    high_number = max([curve[-1] for curve in dejavuzz_curve])
+
     plt.legend(loc="center right", bbox_to_anchor=(1, 0.45), fontsize=10 , frameon=False)
-    plt.axis([0, CURVE_LEN, 0, 3200])
-    plt.yticks(np.arange(0, 3200, 1000))
+    plt.axis([0, CURVE_LEN, 0, high_number])
+    plt.yticks(np.arange(0, high_number, 1000))
     plt.xlabel('Iteration', fontsize=10)
     plt.ylabel('Coverage', fontsize=10)
 
