@@ -52,7 +52,7 @@ def execute_test(target_core, ift_tool):
             file.write(f'{target_core} {ift_tool} {case_name}:\t{finish-start:.2f}s\n')
 
 if __name__ == "__main__":
-    # execute_command('make clean')
+    execute_command('make clean')
     for target_core in ['XiangShan']:
         for ift_tool in ['diffift', 'cellift']:
             compile_test(target_core, ift_tool)
