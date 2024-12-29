@@ -34,6 +34,16 @@ make install PREFIX=/path/to/toolchain
 curl -L https://github.com/com-lihaoyi/mill/releases/download/0.11.12/0.11.12 > /path/to/toolchain/bin/mill && chmod +x /path/to/toolchain/bin/mill
 ```
 
+3. Install cellift's yosys from the cellift-yosys-profiling repository, compile and place the directory in your `PATH`. This yosys is used to comparative experiment between cellift and our diffift.
+
+```bash
+git clone https://github.com/sycuricon/cellift-yosys-profiling.git
+cd cellift-yosys-profiling
+make config-gcc
+make
+make install PREFIX=/path/to/toolchain
+```
+
 ## AE Experience
 
 We design three experience to artification evalution:
@@ -41,5 +51,6 @@ We design three experience to artification evalution:
 - Exp1: verify each simulation stimulus for transient execution vulnerabilities listed in Paper's Table 5
 - Exp2: compare the instruction overhead for triggering transient execution windows between DejaVuzz and SpecDoctor
 - Exp3: compare the fuzzing coverage between DejaVuzz and SpecDoctor
+- Exp4: compare the compile time and execute time between CELLIFT and our diff IFT
 
-The direcctories exp1-case, exp2-trigger and exp3-leak are the workspace of the Exp1, Exp2 and Exp3, respectively. Please do three artification evalution experiments in corresponding workspace.
+The direcctories exp1-case, exp2-trigger, exp3-leak, exp4-cell are the workspace of the Exp1, Exp2 and Exp3, respectively. Please do three artification evalution experiments in corresponding workspace.
