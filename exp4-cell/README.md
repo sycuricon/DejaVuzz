@@ -63,3 +63,32 @@ The final directory hierarchy of the `cell_dataset` is as follows:
 
 2. execute `python cell_measure.py` to compile BOOM and XiangShan design instrumented by diffift or cellift and execute testcase in cell_dataset in order. The compile and execution time will be record in `cell_result_xx-xx-xx-xx-xx-xx`, the `xx-xx-xx-xx-xx-xx` is the start execution time of `python cell_measure.py`.
 
+For example:
+```sh
+BOOM diffift
+BOOM diffift compile:	216.11s
+BOOM diffift spectre-v1:	5.07s
+BOOM diffift spectre-rsb:	5.13s
+BOOM diffift spectre-v2:	5.59s
+BOOM diffift spectre-v4:	5.02s
+BOOM diffift spectre-v3:	5.26s
+BOOM cellift
+BOOM cellift compile:	1857.39s
+BOOM cellift spectre-v1:	194.13s
+BOOM cellift spectre-rsb:	198.06s
+BOOM cellift spectre-v2:	195.14s
+BOOM cellift spectre-v4:	204.58s
+BOOM cellift spectre-v3:	184.58s
+XiangShan diffift
+XiangShan diffift compile:	1388.69s
+XiangShan diffift spectre-v1:	15.54s
+XiangShan diffift spectre-rsb:	15.99s
+XiangShan diffift spectre-v2:	17.31s
+XiangShan diffift spectre-v4:	16.26s
+XiangShan diffift spectre-v3:	16.21s
+XiangShan cellift
+...
+```
+
+The instrument for XiangShan RTL by cellift need too much time. So you needn't wait for this instrument. You'd better stop this script handly after waiting for a enough long time, such as 4-8 hours.
+
