@@ -53,7 +53,9 @@ def execute_test(target_core, ift_tool):
 
 if __name__ == "__main__":
     execute_command('make clean')
-    for target_core in ['XiangShan']:
+    for target_core in ['BOOM', 'XiangShan']:
         for ift_tool in ['diffift', 'cellift']:
+            with open(record_file, 'a+') as file:
+                file.write(f'{target_core} {ift_tool}\n')
             compile_test(target_core, ift_tool)
             execute_test(target_core, ift_tool)
