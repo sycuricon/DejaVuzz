@@ -90,5 +90,5 @@ XiangShan cellift
 ...
 ```
 
-The instrument for XiangShan RTL by cellift need too much time. So you needn't wait for this instrument. You'd better stop this script handly after waiting for a enough long time, such as 4-8 hours.
+The instrument for XiangShan RTL by cellift need more than 10 hour. So you'd better stop this script handly after waiting for a enough long time, such as 4-8 hours. It can prove the instrument XiangShan by cellift is time out.
 
