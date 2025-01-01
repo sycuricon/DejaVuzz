@@ -87,6 +87,9 @@ XiangShan diffift spectre-v2:	17.31s
 XiangShan diffift spectre-v4:	16.26s
 XiangShan diffift spectre-v3:	16.21s
 XiangShan cellift
+XiangShan cellift compile:	37713.61s
+XiangShan cellift spectre-v1:	20899.89s
+XiangShan cellift spectre-rsb:	20023.68s
 ...
 ```
 
