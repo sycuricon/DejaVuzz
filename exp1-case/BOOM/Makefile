@@ -95,14 +95,14 @@ SIM_SRC_C		+= $(SIM_DIR)/divaift_lib.cc
 SIM_SRC_V		+= $(SIM_DIR)/Testbench.ift.v		\
 				   $(SIM_DIR)/divaift_lib.v			\
 				   $(SIM_DIR)/robprofile.v			\
-				   $(SRC_DIR)/$(ROCKET_OUTPUT).top.ift.v
+				   $(YOSYS_TOP_VERILOG_IFT)
 SIM_DEFINE		+= +define+HASTAINT
 else ifeq ($(SIMULATION_MODE),variant)
 SIM_SRC_C		+= $(SIM_DIR)/divaift_lib.cc
 SIM_SRC_V		+= $(SIM_DIR)/Testbench.ift.v		\
 				   $(SIM_DIR)/divaift_lib.v			\
 				   $(SIM_DIR)/robprofile.v			\
-				   $(SRC_DIR)/$(ROCKET_OUTPUT).top.ift.v
+				   $(YOSYS_TOP_VERILOG_IFT)
 SIM_DEFINE		+= +define+HASVARIANT
 else
 SIM_SRC_V		+= $(SIM_DIR)/Testbench.v
