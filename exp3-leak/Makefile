@@ -46,6 +46,7 @@ WORK_MODE 			:= -I $(RAZZLE_DIR)/config/testcase/mem_init.hjson			\
 
 do-gen: 	WORK_MODE += $(GEN_MODE)
 do-fuzz: 	WORK_MODE += $(FUZZ_MODE) --fuzz_mode=leak
+do-fuzz-no-coverage: 	WORK_MODE += $(FUZZ_MODE) --fuzz_mode=no_coverage
 do-fuzz-trigger:	WORK_MODE += $(FUZZ_MODE) --fuzz_mode=trigger
 do-fuzz-access:		WORK_MODE += $(FUZZ_MODE) --fuzz_mode=access
 
@@ -57,6 +58,7 @@ fuzz: $(RAZZLE_DIR)
 
 do-gen: 	fuzz
 do-fuzz:	fuzz
+do-fuzz-no-coverage:	fuzz
 do-fuzz-trigger:	fuzz
 do-fuzz-access:		fuzz
 
