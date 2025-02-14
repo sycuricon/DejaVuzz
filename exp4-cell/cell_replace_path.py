@@ -21,18 +21,19 @@ def get_case_list(case_dir):
 
 def replace_cfg_path(case_list):
     for case_folder_path in case_list:
-        swap_conf_path = os.path.join(case_folder_path, 'swap_mem.cfg')
-        with open(swap_conf_path) as file:
-            swap_mem_conf = libconf.loads(file.read())
-        for mem_region in swap_mem_conf['memory_regions']:
-            init_file_path = mem_region['init_file']
-            init_file_path_token = init_file_path.split('/')
-            file_name = init_file_path_token[-1]
-            base_name = case_folder_path
-            new_init_file_path = os.path.join(base_name, file_name)
-            mem_region['init_file'] = new_init_file_path
-        with open(swap_conf_path, "wt") as file:
-            libconf.dump_dict(swap_mem_conf, file)
+        for swap_cfg_name in ['swap_mem.cfg', 'no_diff.cfg']:
+            swap_conf_path = os.path.join(case_folder_path, swap_cfg_name)
+            with open(swap_conf_path) as file:
+                swap_mem_conf = libconf.loads(file.read())
+            for mem_region in swap_mem_conf['memory_regions']:
+                init_file_path = mem_region['init_file']
+                init_file_path_token = init_file_path.split('/')
+                file_name = init_file_path_token[-1]
+                base_name = case_folder_path
+                new_init_file_path = os.path.join(base_name, file_name)
+                mem_region['init_file'] = new_init_file_path
+            with open(swap_conf_path, "wt") as file:
+                libconf.dump_dict(swap_mem_conf, file)
 
 if __name__ == "__main__":
     case_dataset = get_case_dataset()
