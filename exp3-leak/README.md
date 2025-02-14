@@ -20,6 +20,12 @@ You can construct your toolchain by the steps in root directory's README.
 TODO:
 ```
 
+4. compile the DejaVuzz framework in folder `specdoctor` before executing.
+
+```
+make -C specdoctor vcs
+```
+
 ## Directory Hierarchy of Dataset
 
 The final directory hierarchy of the `leak_dataset` is as follows:

@@ -52,5 +52,7 @@ We design three experience to artification evalution:
 - Exp2: compare the instruction overhead for triggering transient execution windows between DejaVuzz and SpecDoctor
 - Exp3: compare the fuzzing coverage between DejaVuzz and SpecDoctor
 - Exp4: compare the compile time and execute time between CELLIFT and our diff IFT
+- Exp5: verify the effect of the liveness mask on filtering false positive
+- Exp6: verify the effect of the different secret pair when a false negative occurs
 
-The direcctories exp1-case, exp2-trigger, exp3-leak, exp4-cell are the workspace of the Exp1, Exp2 and Exp3, respectively. Please do three artification evalution experiments in corresponding workspace.
+The direcctories exp1-case, exp2-trigger, exp3-leak, exp4-cell, exp5-liveness, exp6-diff are the workspace of the Exp1, Exp2, Exp3, Exp4, Exp5 and Exp6 respectively. Please do three artification evalution experiments in corresponding workspace.
