@@ -53,7 +53,7 @@ def casedataset_execute(repo_prefix):
             thread_list = []
             for file_index in index_list:
                 thread = threading.Thread(target=case_execute, \
-                    args=(case_dataset_path, result_output_path, wave_path, file_index, 'BOOM'))
+                    args=(case_dataset_path, result_output_path, wave_path, file_index, target_core))
                 thread.start()
                 thread_list.append(thread)
             for thread in thread_list:
