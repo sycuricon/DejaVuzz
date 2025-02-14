@@ -4,7 +4,7 @@ from trigger_replace_path import *
 
 trigger_type_list = [
     'load/store access fault', 'load/store page fault', 'load/store misalign', 'illegal instruction',
-    'memory  disambiguation', 'branch mispredict', 'indirect jump mispredict', 'return address mispredict'
+    'memory  disambiguation', 'branch mispredict', 'indirect jump mispredict', 'return address mispredict', 'straight line speculation'
 ]
 
 trigger_type_map = {
@@ -18,7 +18,8 @@ trigger_type_map = {
     'v4':'memory  disambiguation',
     'branch':'branch mispredict',
     'jalr':'indirect jump mispredict',
-    'return':'return address mispredict'
+    'return':'return address mispredict',
+    'next':'straight line speculation'
 }
 
 def init_overhead_dict():
@@ -39,6 +40,13 @@ def statistic_trigger(folder_name):
         trigger_type = ((record['trans']['victim']['block_info']['trigger_block']['type']).split('.')[-1]).lower()
         trigger_type = trigger_type_map[trigger_type]
         case_path = os.path.join(trigger_code_path, f'trigger_{iter_num}')
+
+        # print(trigger_type, len(record['trans']['train']))
+        if trigger_type in ['branch mispredict', 'indirect jump mispredict', 'return address mispredict'] and len(record['trans']['train']) == 0:
+            if trigger_type == 'branch mispredict':
+                print(record['trans']['victim']['block_info']['trigger_block']['type'])
+            trigger_type = 'straight line speculation'
+
 
         line_num = 0
         valid_num = 0
