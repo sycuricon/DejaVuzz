@@ -43,8 +43,6 @@ def statistic_trigger(folder_name):
 
         # print(trigger_type, len(record['trans']['train']))
         if trigger_type in ['branch mispredict', 'indirect jump mispredict', 'return address mispredict'] and len(record['trans']['train']) == 0:
-            if trigger_type == 'branch mispredict':
-                print(record['trans']['victim']['block_info']['trigger_block']['type'])
             trigger_type = 'straight line speculation'
 
 
