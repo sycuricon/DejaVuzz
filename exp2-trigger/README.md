@@ -4,10 +4,34 @@ Experiment E2 is used to compute the trainning overhead of DejaVuzz and SpecDoct
 
 ## Setup
 
-1. download dataset to exp2-trigger/trigger_dataset path.
+1. set up the experiment environment following the README in root directory
+
+2. export `DEJAVUZZ` shell variant to directory of toolchian
+
+```sh
+    export DEJAVUZZ=/path/to/toolchain
+```
+
+You can construct your toolchain by the steps in root directory's README.
+
+3. download dataset to exp2-trigger/trigger_dataset path.
 
 ```
 TODO:
+```
+
+4. create soft link to `exp1-case/BOOM`
+
+```
+ln -s ../exp1-case/BOOM
+```
+
+5. set up the stimulus template generator `razzle`. Razzle is used to generate simulation stimulus for RTL and to provide the fuzzing framework.
+
+```bash
+git clone https://github.com/sycuricon/InstGenerator.git
+cd InstGenerator
+pip3 install -r requirements.txt
 ```
 
 ## Directory Hierarchy of Dataset
@@ -48,7 +72,7 @@ TODO:
 
 ## Execute experiment
 
-1. run `python dejavuzz_trigger_statistic.py` to statstic the trainning overhead of `BOOM DejaVuzz`, `BOOM DejaVuzz*`, `XiangShan DejaVuzz`, `XiangShan DejaVuzz*`. 
+1. run `python dejavuzz_trigger_execute.py` to run four trigger configuration, `BOOM DejaVuzz`, `BOOM DejaVuzz*`, `XiangShan DejaVuzz`, `XiangShan DejaVuzz*`. The fuzz result is in `exp2-trigger/build`. The execute `python dejavuzz_trigger_execute` to statstic the trainning overhead of four configurations.
 
 ```
 $ python dejavuzz_trigger_statistic.py 
@@ -58,9 +82,10 @@ load/store page fault:  ave_line_num:0.0        ave_valid_num:0.0
 load/store misalign:    ave_line_num:0.0        ave_valid_num:0.0
 illegal instruction:    ave_line_num:*  ave_valid_num:*
 memory  disambiguation: ave_line_num:0.0        ave_valid_num:0.0
-branch mispredict:      ave_line_num:19.4       ave_valid_num:0.9
+branch mispredict:      ave_line_num:86.4       ave_valid_num:3.8
 indirect jump mispredict:       ave_line_num:85.7       ave_valid_num:2.8
 return address mispredict:      ave_line_num:85.6       ave_valid_num:2.7
+straight line speculation:      ave_line_num:0.0        ave_valid_num:0.0
 
 BOOM_random_trigger_test:
 ...
@@ -75,7 +100,35 @@ XiangShan_random_trigger_test:
 
 `BOOM DejaVuzz`, `BOOM DejaVuzz*`, `XiangShan DejaVuzz`, `XiangShan DejaVuzz*` are corresponding to `BOOM_trigger_test`, `BOOM_random_trigger_test`, `XiangShan_trigger_test` and `XiangShan_trigger_test` in output of script. `ave_line_num` and `ave_valid_num` are corresponding to the TO and ETO in Table 3.
 
-2. run `python specdoctor_trigger_statistic.py` to statstic the trainning overhead of SpecDoctor.
+2. run `python dejavuzz_trigger_statistic_dataset.py` to statstic the trainning overhead of `BOOM DejaVuzz`, `BOOM DejaVuzz*`, `XiangShan DejaVuzz`, `XiangShan DejaVuzz*`. 
+
+```
+$ python dejavuzz_trigger_statistic.py 
+BOOM_trigger_test:
+load/store access fault:        ave_line_num:0.0        ave_valid_num:0.0
+load/store page fault:  ave_line_num:0.0        ave_valid_num:0.0
+load/store misalign:    ave_line_num:0.0        ave_valid_num:0.0
+illegal instruction:    ave_line_num:*  ave_valid_num:*
+memory  disambiguation: ave_line_num:0.0        ave_valid_num:0.0
+branch mispredict:      ave_line_num:86.4       ave_valid_num:3.8
+indirect jump mispredict:       ave_line_num:85.7       ave_valid_num:2.8
+return address mispredict:      ave_line_num:85.6       ave_valid_num:2.7
+straight line speculation:      ave_line_num:0.0        ave_valid_num:0.0
+
+BOOM_random_trigger_test:
+...
+
+XiangShan_trigger_test:
+...
+
+XiangShan_random_trigger_test:
+...
+
+```
+
+The output format is the same with the `dejavuzz_trigger_statistic_runtime.py`'s.
+
+3. run `python specdoctor_trigger_statistic_dataset.py` to statstic the trainning overhead of SpecDoctor.
 
 ```
 $ python specdoctor_trigger_statstic.py 
