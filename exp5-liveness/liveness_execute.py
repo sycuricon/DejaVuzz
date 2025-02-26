@@ -18,10 +18,26 @@ def system_call(string):
 def case_execute(input_directory, output_directory, wave_directory, index, target_core):
     input_path = os.path.join(input_directory, str(index))
     swap_cfg_path = os.path.join(input_path, 'spec.cfg')
-    live_name = os.path.join(wave_directory, f'spec_{index%THREAD_NUM}.taint.live')
-    output_path = os.path.join(output_directory, f'{index}.taint.live')
-    system_call(f'make -C {target_core} vcs STARSHIP_TESTCASE={swap_cfg_path} SIMULATION_LABEL=spec_{index%THREAD_NUM} SIMULATION_MODE=variant')
-    system_call(f'cp {live_name} {output_path}')
+
+    temp_file = os.path.join(wave_directory, f'.{index}_temp')
+    system_call(f'nm {input_path}/dut.riscv | grep spdoc > {temp_file}')
+    for line in open(temp_file):
+        addr, _, _ = line.split()
+        addr = int(addr, base=16)
+        break
+    system_call(f'rm {temp_file}')
+    
+    system_call(f'make -C {target_core} vcs STARSHIP_TESTCASE={swap_cfg_path} SIMULATION_LABEL=spec_{index%THREAD_NUM} SIMULATION_MODE=variant VCS_SPDOC_ADDR={addr}')
+    for suffix in ['.live', '.csv', '.log', '.cov']:
+        live_name = os.path.join(wave_directory, f'spec_{index%THREAD_NUM}.taint{suffix}')
+        output_path = os.path.join(output_directory, f'{index}.taint{suffix}')
+        system_call(f'cp {live_name} {output_path}')
+
+    system_call(f'make -C {target_core} vcs STARSHIP_TESTCASE={swap_cfg_path} SIMULATION_LABEL=spec_{index%THREAD_NUM} SIMULATION_MODE=variant VCS_EARLY_EXIT=1')
+    for suffix in ['.live', '.csv', '.log', '.cov']:
+        live_name = os.path.join(wave_directory, f'spec_{index%THREAD_NUM}.taint{suffix}')
+        output_path = os.path.join(output_directory, f'{index}.taint{suffix}.early')
+        system_call(f'cp {live_name} {output_path}')
 
 def casedataset_execute(repo_prefix):
     current_file = os.path.abspath(__file__)
