@@ -132,8 +132,10 @@ VCS_OPTION	:= -quiet -notice -line +rad -full64 +nospecify +notimingcheck -derac
 			   +vcs+lic+wait +vcs+initreg+random +v2k -debug_acc+all -timescale=1ns/10ps 			\
 			   +incdir+$(VCS_INCLUDE) $(VCS_PARAL_COM) -CFLAGS "$(VCS_CFLAGS)" -lconfig++			\
 			   $(CHISEL_DEFINE) $(VCS_DEFINE)
+VCS_SPDOC_ADDR	?= 0
+VCS_EARLY_EXIT	?= 0
 VCS_SIM_OPTION	:= +vcs+initreg+0 $(VCS_PARAL_RUN) +testcase=$(STARSHIP_TESTCASE) +label=$(SIMULATION_LABEL)\
-	+secret_addr=2160066560 +secret_size=1024
+	+secret_addr=2160066560 +secret_size=1024 +early_exit=$(VCS_EARLY_EXIT) +spdoc_addr=$(VCS_SPDOC_ADDR)
 
 vcs-wave: 		VCS_SIM_OPTION += +dump +uart_tx=0
 vcs-debug: 		VCS_SIM_OPTION += +verbose +uart_tx=0
