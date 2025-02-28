@@ -15,13 +15,14 @@ def system_call(string):
     else:
         raise Exception('cannot handle this system call by delay')
 
-def specdoctor_case_execute(input_directory, output_directory, wave_directory, index):
+def specdoctor_case_execute(input_directory, output_directory, wave_directory, index, repo_prefix):
     input_path = os.path.join(input_directory, str(index))
     swap_cfg_path = os.path.join(input_path, 'spec.cfg')
-    cov_name = os.path.join(wave_directory, f'spec_{index%THREAD_NUM}.taint.cov')
-    output_path = os.path.join(output_directory, f'{index}.taint.cov')
-    system_call(f'make -C specdoctor vcs STARSHIP_TESTCASE={swap_cfg_path} SIMULATION_LABEL=spec_{index%THREAD_NUM} SIMULATION_MODE=variant')
-    system_call(f'cp {cov_name} {output_path}')
+    system_call(f'make -C specdoctor vcs STARSHIP_TESTCASE={swap_cfg_path} SIMULATION_LABEL={repo_prefix}_{index%THREAD_NUM} SIMULATION_MODE=variant')
+    for suffix in ['.live', '.csv', '.log', '.cov']:
+        cov_name = os.path.join(wave_directory, f'{repo_prefix}_{index%THREAD_NUM}.taint{suffix}')
+        output_path = os.path.join(output_directory, f'{index}.taint{suffix}')
+        system_call(f'cp {cov_name} {output_path}')
 
 def specdoctor_casedataset_execute(target_dataset, repo_prefix):
     current_file = os.path.abspath(__file__)
@@ -53,7 +54,7 @@ def specdoctor_casedataset_execute(target_dataset, repo_prefix):
         thread_list = []
         for file_index in index_list:
             thread = threading.Thread(target=specdoctor_case_execute, \
-                args=(case_dataset_path, result_output_path, wave_path, file_index))
+                args=(case_dataset_path, result_output_path, wave_path, file_index, repo_prefix))
             thread.start()
             thread_list.append(thread)
         for thread in thread_list:
@@ -66,11 +67,11 @@ if __name__ == "__main__":
     repo_prefix = f'specdoctor_result_{time_str}'
 
     target_dataset = [
-        'U2M_ATTACKER', 
-        'S2M_ATTACKER',
-        'U2S_ATTACKER',
-        'U2S_VICTIM',
-        'S2M_VICTIM',
+        'spec_0', 
+        'spec_1',
+        'spec_2',
+        # 'spec_3',
+        # 'spec_4',
     ]
     for case_dataset in target_dataset:
         specdoctor_casedataset_execute(case_dataset, repo_prefix)
