@@ -1,4 +1,5 @@
 import argparse
+import csv
 import os
 
 def compute_comp(taint_file):
@@ -45,7 +46,6 @@ def specdoctor_diverage(file):
         if exec_info == 'SPEC_END' and not is_dut:
             spec_end_vnt = exec_time
     return spec_end_dut != spec_end_vnt
-
 
 def liveness_analysis(folder_path, case_num):
     if not os.path.exists(folder_path):
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     parser.add_argument("-I", "--input", dest="input", required=True, help="time suffix")
     args = parser.parse_args()
     current_folder_path = os.path.dirname(os.path.realpath(__file__))
-    folder_path = os.path.join(current_folder_path, f'liveness_result_{args.input}')
+    folder_path = os.path.join(current_folder_path, f'{args.input}')
     dataset_path = os.path.join(current_folder_path, 'liveness_dataset')
     case_num = len(os.listdir(dataset_path))
     liveness_analysis(folder_path, case_num)
