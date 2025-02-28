@@ -46,13 +46,18 @@ reg [63:0] last_pc = 0;
 reg maybe_deadlock = 0;
 reg early_exit = 0;
 wire can_early_exit;
-assign can_early_exit = 
-  (`DUT_ROB_ENQ_PC_0 == `EARLY_EXIT_PC) & `DUT_ROB_ENQ_EN_0
-  & early_exit;
+wire begin_victim;
+assign begin_victim = (`DUT_ROB_DEQ_PC_0 == `EARLY_EXIT_PC) & `DUT_ROB_DEQ_EN_0;
+assign can_early_exit = begin_victim & early_exit;
 reg [6:0] exit_count = 0;
 
 always @(posedge clock) begin
   if (!reset) begin
+    if(begin_victim)begin
+      $fwrite(event_fd, "%t, SPEC_VICTIM, %d, %d\n", $time, 0, `IS_DUT);
+      $display("SPEC_VICTIM");
+    end
+
     if (`DUT_ROB_DEQ_EN_0) begin
       last_pc <= `DUT_ROB_DEQ_PC_0;
     end
@@ -100,13 +105,18 @@ reg [63:0] last_pc_variant = 0;
 reg maybe_deadlock_variant = 0;
 reg early_exit_variant = 0;
 wire can_early_exit_variant;
-assign can_early_exit_variant = 
-  (`VNT_ROB_ENQ_PC_0 == `EARLY_EXIT_PC) & `VNT_ROB_ENQ_EN_0
-  & early_exit_variant;
+wire begin_victim_variant;
+assign begin_victim_variant = (`VNT_ROB_DEQ_PC_0 == `EARLY_EXIT_PC) & `VNT_ROB_DEQ_EN_0;
+assign can_early_exit_variant = begin_victim & early_exit;
 reg [6:0] exit_count_variant = 0;
 
 always @(posedge clock) begin
   if (!reset) begin
+    if(begin_victim_variant)begin
+      $fwrite(event_fd, "%t, SPEC_VICTIM, %d, %d\n", $time, 0, `IS_VNT);
+      $display("SPEC_VICTIM");
+    end
+
     if (`VNT_ROB_DEQ_EN_0) begin
       last_pc_variant <= `VNT_ROB_DEQ_PC_0;
     end
