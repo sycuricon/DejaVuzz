@@ -18,9 +18,11 @@
 `define EARLY_EXIT_PC 64'h80600000
 
 reg [63:0] spdoc_addr;
+reg [63:0] transient_addr;
 initial begin
   void'($value$plusargs("early_exit=%d", early_exit));
   void'($value$plusargs("spdoc_addr=%d", spdoc_addr));
+  void'($value$plusargs("transient_addr=%d", transient_addr));
 end
 
 always @(posedge clock) begin
@@ -46,16 +48,34 @@ reg [63:0] last_pc = 0;
 reg maybe_deadlock = 0;
 reg early_exit = 0;
 wire can_early_exit;
-wire begin_victim;
-assign begin_victim = (`DUT_ROB_DEQ_PC_0 == `EARLY_EXIT_PC) & `DUT_ROB_DEQ_EN_0;
-assign can_early_exit = begin_victim & early_exit;
+wire spec_victim_begin_enq;
+wire spec_victim_begin_deq;
+wire spec_tsx_begin_enq;
+wire spec_tsx_begin_deq;
+assign spec_victim_begin_deq = (`DUT_ROB_DEQ_PC_0 == `EARLY_EXIT_PC) & `DUT_ROB_DEQ_EN_0;
+assign spec_victim_begin_enq = (`DUT_ROB_ENQ_PC_0 == `EARLY_EXIT_PC) & `DUT_ROB_ENQ_EN_0;
+assign spec_tsx_begin_deq = (`DUT_ROB_DEQ_PC_0 == transient_addr) & `DUT_ROB_DEQ_EN_0;
+assign spec_tsx_begin_enq = (`DUT_ROB_ENQ_PC_0 == transient_addr) & `DUT_ROB_ENQ_EN_0;
+assign can_early_exit = spec_victim_begin_enq & early_exit;
 reg [6:0] exit_count = 0;
 
 always @(posedge clock) begin
   if (!reset) begin
-    if(begin_victim)begin
-      $fwrite(event_fd, "%t, SPEC_VICTIM, %d, %d\n", $time, 0, `IS_DUT);
-      $display("SPEC_VICTIM");
+    if(spec_victim_begin_deq)begin
+      $fwrite(event_fd, "%t, SPEC_VICTIM_BEGIN_DEQ, %d, %d\n", $time, 0, `IS_DUT);
+      $display("SPEC_VICTIM_BEGIN_DEQ");
+    end
+    if(spec_victim_begin_enq)begin
+      $fwrite(event_fd, "%t, SPEC_VICTIM_BEGIN_ENQ, %d, %d\n", $time, 0, `IS_DUT);
+      $display("SPEC_VICTIM_BEGIN_ENQ");
+    end
+    if(spec_tsx_begin_deq)begin
+      $fwrite(event_fd, "%t, SPEC_TSX_BEGIN_DEQ, %d, %d\n", $time, 0, `IS_DUT);
+      $display("SPEC_TSX_BEGIN_DEQ");
+    end
+    if(spec_tsx_begin_enq)begin
+      $fwrite(event_fd, "%t, SPEC_TSX_BEGIN_ENQ, %d, %d\n", $time, 0, `IS_DUT);
+      $display("SPEC_TSX_BEGIN_ENQ");
     end
 
     if (`DUT_ROB_DEQ_EN_0) begin
@@ -103,18 +123,35 @@ Testbench.testHarness_variant.ldut.tile_prci_domain.tile_reset_domain_boom_tile.
 reg tsx_end_spec_variant = 0;
 reg [63:0] last_pc_variant = 0;
 reg maybe_deadlock_variant = 0;
-reg early_exit_variant = 0;
 wire can_early_exit_variant;
-wire begin_victim_variant;
-assign begin_victim_variant = (`VNT_ROB_DEQ_PC_0 == `EARLY_EXIT_PC) & `VNT_ROB_DEQ_EN_0;
-assign can_early_exit_variant = begin_victim & early_exit;
+wire spec_victim_begin_enq_variant;
+wire spec_victim_begin_deq_variant;
+wire spec_tsx_begin_enq_variant;
+wire spec_tsx_begin_deq_variant;
+assign spec_victim_begin_deq_variant = (`VNT_ROB_DEQ_PC_0 == `EARLY_EXIT_PC) & `VNT_ROB_DEQ_EN_0;
+assign spec_victim_begin_enq_variant = (`VNT_ROB_ENQ_PC_0 == `EARLY_EXIT_PC) & `VNT_ROB_ENQ_EN_0;
+assign spec_tsx_begin_deq_variant = (`VNT_ROB_DEQ_PC_0 == transient_addr) & `VNT_ROB_DEQ_EN_0;
+assign spec_tsx_begin_enq_variant = (`VNT_ROB_ENQ_PC_0 == transient_addr) & `VNT_ROB_ENQ_EN_0;
+assign can_early_exit_variant = spec_victim_begin_enq_variant & early_exit;
 reg [6:0] exit_count_variant = 0;
 
 always @(posedge clock) begin
   if (!reset) begin
-    if(begin_victim_variant)begin
-      $fwrite(event_fd, "%t, SPEC_VICTIM, %d, %d\n", $time, 0, `IS_VNT);
-      $display("SPEC_VICTIM");
+    if(spec_victim_begin_deq_variant)begin
+      $fwrite(event_fd, "%t, SPEC_VICTIM_BEGIN_DEQ, %d, %d\n", $time, 0, `IS_VNT);
+      $display("SPEC_VICTIM_BEGIN_DEQ");
+    end
+    if(spec_victim_begin_enq_variant)begin
+      $fwrite(event_fd, "%t, SPEC_VICTIM_BEGIN_ENQ, %d, %d\n", $time, 0, `IS_VNT);
+      $display("SPEC_VICTIM_BEGIN_ENQ");
+    end
+    if(spec_tsx_begin_deq_variant)begin
+      $fwrite(event_fd, "%t, SPEC_TSX_BEGIN_DEQ, %d, %d\n", $time, 0, `IS_VNT);
+      $display("SPEC_TSX_BEGIN_DEQ");
+    end
+    if(spec_tsx_begin_enq_variant)begin
+      $fwrite(event_fd, "%t, SPEC_TSX_BEGIN_ENQ, %d, %d\n", $time, 0, `IS_VNT);
+      $display("SPEC_TSX_BEGIN_ENQ");
     end
 
     if (`VNT_ROB_DEQ_EN_0) begin

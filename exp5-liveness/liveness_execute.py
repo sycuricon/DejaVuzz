@@ -3,7 +3,7 @@ import time
 import datetime
 import threading
 
-THREAD_NUM = 64
+THREAD_NUM = 16
 
 def system_call(string):
     print(string)
@@ -22,18 +22,23 @@ def case_execute(input_directory, output_directory, wave_directory, index, targe
     temp_file = os.path.join(wave_directory, f'.{index}_temp')
     system_call(f'nm {input_path}/dut.riscv | grep spdoc > {temp_file}')
     for line in open(temp_file):
-        addr, _, _ = line.split()
-        addr = int(addr, base=16)
+        spec_addr, _, _ = line.split()
+        spec_addr = int(spec_addr, base=16)
+        break
+    system_call(f'nm {input_path}/dut.riscv | grep transient$ > {temp_file}')
+    for line in open(temp_file):
+        tsx_addr, _, _ = line.split()
+        tsx_addr = int(tsx_addr, base=16)
         break
     system_call(f'rm {temp_file}')
     
-    system_call(f'make -C {target_core} vcs STARSHIP_TESTCASE={swap_cfg_path} SIMULATION_LABEL=spec_{index%THREAD_NUM} SIMULATION_MODE=variant VCS_SPDOC_ADDR={addr}')
+    system_call(f'make -C {target_core} vcs STARSHIP_TESTCASE={swap_cfg_path} SIMULATION_LABEL=spec_{index%THREAD_NUM} SIMULATION_MODE=variant VCS_SPDOC_ADDR={spec_addr} VCS_TSX_ADDR={tsx_addr}')
     for suffix in ['.live', '.csv', '.log', '.cov']:
         live_name = os.path.join(wave_directory, f'spec_{index%THREAD_NUM}.taint{suffix}')
         output_path = os.path.join(output_directory, f'{index}.taint{suffix}')
         system_call(f'cp {live_name} {output_path}')
 
-    system_call(f'make -C {target_core} vcs STARSHIP_TESTCASE={swap_cfg_path} SIMULATION_LABEL=spec_{index%THREAD_NUM} SIMULATION_MODE=variant VCS_EARLY_EXIT=1')
+    system_call(f'make -C {target_core} vcs STARSHIP_TESTCASE={swap_cfg_path} SIMULATION_LABEL=spec_{index%THREAD_NUM} SIMULATION_MODE=variant VCS_EARLY_EXIT=1 VCS_TSX_ADDR={tsx_addr}')
     for suffix in ['.live', '.csv', '.log', '.cov']:
         live_name = os.path.join(wave_directory, f'spec_{index%THREAD_NUM}.taint{suffix}')
         output_path = os.path.join(output_directory, f'{index}.taint{suffix}.early')
