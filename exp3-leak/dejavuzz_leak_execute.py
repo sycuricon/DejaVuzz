@@ -31,7 +31,7 @@ def execute_command(stop_event:threading.Event, command:str, sleep_interval):
     if process.poll() is None:
         os.killpg(process.pid, signal.SIGTERM)
 
-def dejavuzz_execute_and_analysis(repo_prefix, group_prefix):
+def dejavuzz_execute_and_analysis(repo_prefix, group_prefix, command):
     current_path = os.path.abspath(__file__)
     current_folder = os.path.dirname(current_path)
     repo_path = os.path.join(current_folder, repo_prefix)
@@ -45,7 +45,7 @@ def dejavuzz_execute_and_analysis(repo_prefix, group_prefix):
 
     fuzz_path = os.path.join(current_folder, 'build', f'BOOM_{group_prefix}')
     assert not os.path.exists(fuzz_path), f"the repo {fuzz_path} has existed, please delete that repo or execute script again"
-    command = f'make do-fuzz TARGET_CORE=BOOM PREFIX={group_prefix}'
+    command = f'make {command} TARGET_CORE=BOOM PREFIX={group_prefix}'
     stop_event = threading.Event()
     fuzz_thread = threading.Thread(target=execute_command, args=(stop_event, command, EXAMINE_INTERVAL/4))
     fuzz_thread.start()
@@ -109,7 +109,18 @@ if __name__ == "__main__":
     try:
         while True:
             group_prefix = time_str
-            result = dejavuzz_execute_and_analysis(repo_prefix, group_prefix)
+            result = dejavuzz_execute_and_analysis(repo_prefix, f'no_cov_{group_prefix}', 'do-fuzz-no-coverage')
+            if result:
+                break
+            current_time = datetime.datetime.now()
+            time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
+        
+        current_time = datetime.datetime.now()
+        time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
+        
+        while True:
+            group_prefix = time_str
+            result = dejavuzz_execute_and_analysis(repo_prefix, group_prefix, 'do-fuzz')
             if result:
                 break
             current_time = datetime.datetime.now()

@@ -78,8 +78,8 @@ if __name__ == "__main__":
         'spec_0', 
         'spec_1',
         'spec_2',
-        # 'spec_3',
-        # 'spec_4',
+        'spec_3',
+        'spec_4',
     ]
     for case_dataset in target_dataset:
         specdoctor_casedataset_execute(case_dataset, repo_prefix)
