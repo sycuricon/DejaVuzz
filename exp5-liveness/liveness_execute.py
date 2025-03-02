@@ -3,7 +3,7 @@ import time
 import datetime
 import threading
 
-THREAD_NUM = 16
+THREAD_NUM = 64
 
 def system_call(string):
     print(string)
