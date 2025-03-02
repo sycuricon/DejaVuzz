@@ -46,7 +46,10 @@ def specdoctor_illegal(file):
             first_spec_tsx_begin = exec_time
         if is_dut and exec_info == 'SPEC_VICTIM_BEGIN_ENQ':
             last_spec_victim_begin = exec_time
-    return  last_spec_victim_begin > first_spec_tsx_begin
+    if first_spec_tsx_begin == 0:
+        return False
+    else:
+        return last_spec_victim_begin > first_spec_tsx_begin
 
 def specdoctor_diverage(file):
     dut_label_list = []
