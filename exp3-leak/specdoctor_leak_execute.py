@@ -17,16 +17,21 @@ def system_call(string):
 
 def specdoctor_case_execute(input_directory, output_directory, wave_directory, index, repo_prefix):
     input_path = os.path.join(input_directory, str(index))
-    temp_file = f'.{repo_prefix}_{index}_temp'
+    temp_file = os.path.join(output_directory, f'.{repo_prefix}_{index}_temp')
     system_call(f'nm {os.path.join(input_path, "dut.elf")} | grep spdoc > {temp_file}')
     for line in open(temp_file):
-        addr, _, _ = line.split()
-        addr = int(addr, base=16)
+        spec_addr, _, _ = line.split()
+        spec_addr = int(spec_addr, base=16)
         break
-    print(addr)
+    system_call(f'nm {os.path.join(input_path, "dut.elf")} | grep transient$ > {temp_file}')
+    for line in open(temp_file):
+        tsx_addr, _, _ = line.split()
+        tsx_addr = int(tsx_addr, base=16)
+        break
     system_call(f'rm {temp_file}')
+    
     swap_cfg_path = os.path.join(input_path, 'spec.cfg')
-    system_call(f'make -C specdoctor vcs STARSHIP_TESTCASE={swap_cfg_path} SIMULATION_LABEL={repo_prefix}_{index%THREAD_NUM} SIMULATION_MODE=variant VCS_SPDOC_ADDR={addr}')
+    system_call(f'make -C specdoctor vcs STARSHIP_TESTCASE={swap_cfg_path} SIMULATION_LABEL={repo_prefix}_{index%THREAD_NUM} SIMULATION_MODE=variant VCS_SPDOC_ADDR={spec_addr} VCS_TSX_ADDR={tsx_addr}')
     for suffix in ['.live', '.csv', '.log', '.cov']:
         cov_name = os.path.join(wave_directory, f'{repo_prefix}_{index%THREAD_NUM}.taint{suffix}')
         output_path = os.path.join(output_directory, f'{index}.taint{suffix}')
