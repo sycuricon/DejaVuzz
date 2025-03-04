@@ -6,7 +6,7 @@ import os
 import argparse
 import scipy.stats as stats
 
-CURVE_LEN = 3000
+CURVE_LEN = 20000
 
 def draw_plot(cov_list, label, color):
     ave_list = []
@@ -112,6 +112,10 @@ def spec_get_curve(spec_cov_list, index, specdoctor_path):
                         coverage.update({(comp, value)})
                         cov_comp[comp] = cov_comp.get(comp, {})
                         cov_comp[comp][value] = cov_comp[comp].get(value, 0) + 1
+            else:
+                print('diverage', log_name)
+        else:
+            print('illegal', log_name)
         old_num = len(cov_set)
         cov_set.update(coverage)
         new_num = len(cov_set)
@@ -150,17 +154,24 @@ def dejavuzz_get_curve(filename):
     return curve
 
 def analysis_and_draw(specdoctor_path, dejavuzz_path):
-    # assert os.path.exists(specdoctor_path), f'{specdoctor_path} doesn\'t exist'
-    # assert os.path.exists(dejavuzz_path), f'{dejavuzz_path} doesn\'t exist'
+    assert os.path.exists(specdoctor_path), f'{specdoctor_path} doesn\'t exist'
+    assert os.path.exists(dejavuzz_path), f'{dejavuzz_path} doesn\'t exist'
 
-    # dejavuzz_curve = []
-    # for dejavuzz_curve_file in os.listdir(dejavuzz_path):
-    #     if dejavuzz_curve_file == 'fuzz.log':
-    #         continue
-    #     dejavuzz_curve_file_path = os.path.join(dejavuzz_path, dejavuzz_curve_file)
-    #     dejavuzz_curve.append(dejavuzz_get_curve(dejavuzz_curve_file_path))
-    # dejavuzz_curve_len = min(min([len(curve) for curve in dejavuzz_curve]), CURVE_LEN)
-    # dejavuzz_curve = [curve[:dejavuzz_curve_len] for curve in dejavuzz_curve]
+    dejavuzz_curve = []
+    dejavuzz_no_cov_curve = []
+    for dejavuzz_curve_file in os.listdir(dejavuzz_path):
+        if dejavuzz_curve_file == 'fuzz.log':
+            continue
+        dejavuzz_curve_file_path = os.path.join(dejavuzz_path, dejavuzz_curve_file)
+        curve = dejavuzz_get_curve(dejavuzz_curve_file_path)
+        if dejavuzz_curve_file.startswith('no_cov'):
+            dejavuzz_no_cov_curve.append(curve)
+        else:
+            dejavuzz_curve.append(curve)
+    dejavuzz_curve_len = min(min([len(curve) for curve in dejavuzz_curve]), CURVE_LEN)
+    dejavuzz_curve = [curve[:dejavuzz_curve_len] for curve in dejavuzz_curve]
+    dejavuzz_no_cov_curve_len = min(min([len(curve) for curve in dejavuzz_no_cov_curve]), CURVE_LEN)
+    dejavuzz_no_cov_curve = [curve[:dejavuzz_no_cov_curve_len] for curve in dejavuzz_no_cov_curve]
 
     specdoctor_curve = []
     specdoctor_cov_folder_list = [file_name for file_name in os.listdir(specdoctor_path) \
@@ -176,9 +187,13 @@ def analysis_and_draw(specdoctor_path, dejavuzz_path):
     # draw_plot(dejavuzz_curve, label='DejaVuzz', color="#2878b5")
     for curve in dejavuzz_curve:
         plt.plot(curve, label='DejaVuzz', color="#2878b5")
+    for curve in dejavuzz_no_cov_curve:
+        plt.plot(curve, label='DejaVuzz-', color="#28ff28")
     draw_plot(specdoctor_curve, label='SpecDoctor', color="#ffbe7a")
 
-    high_number = max([curve[-1] for curve in dejavuzz_curve])
+    high_dejavuzz_number = max([curve[-1] for curve in dejavuzz_curve])
+    high_dejavuzz_no_cov_number = max([curve[-1] for curve in dejavuzz_no_cov_curve])
+    high_number = max(high_dejavuzz_number, high_dejavuzz_no_cov_number)
 
     plt.legend(loc="center right", bbox_to_anchor=(1, 0.45), fontsize=10 , frameon=False)
     plt.axis([0, CURVE_LEN, 0, high_number])
