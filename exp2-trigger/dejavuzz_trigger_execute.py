@@ -116,6 +116,8 @@ if __name__ == "__main__":
                     if result:
                         break
         
+        with open(mem_hjson, 'rt') as file:
+            mem_config = hjson.loads(file.read())
         mem_config['train_align'] = 'False'
         mem_config['train_single'] = 'False'
         with open(mem_hjson, 'wt') as file:
