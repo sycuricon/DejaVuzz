@@ -94,8 +94,7 @@ def dejavuzz_execute_and_analysis(repo_prefix, target_core, group_prefix):
     return execute_result
 
 if __name__ == "__main__":
-    current_time = datetime.datetime.now()
-    time_str = current_time.strftime("%Y-%m-%d-%H-%M-%S")
+    time_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
     repo_prefix = f'dejavuzz_result_{time_str}'
 
     try:
@@ -110,8 +109,9 @@ if __name__ == "__main__":
 
         for target_core in ['BOOM', 'XiangShan']:
             for i in range(TRIGGER_GROUP_NUM):
-                group_prefix = f'trigger_test_0{i}_{time_str}'
                 while True:
+                    time_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+                    group_prefix = f'trigger_test_0{i}_{time_str}'
                     result = dejavuzz_execute_and_analysis(repo_prefix, target_core, group_prefix)
                     if result:
                         break
@@ -125,8 +125,9 @@ if __name__ == "__main__":
         
         for target_core in ['BOOM', 'XiangShan']:
             for i in range(TRIGGER_GROUP_NUM):
-                group_prefix = f'random_trigger_test_0{i}_{time_str}'
                 while True:
+                    time_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+                    group_prefix = f'random_trigger_test_0{i}_{time_str}'
                     result = dejavuzz_execute_and_analysis(repo_prefix, target_core, group_prefix)
                     if result:
                         break
