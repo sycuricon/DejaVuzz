@@ -9,16 +9,12 @@ def compute_comp(taint_file):
         if ':' in line:
             line = list(line.split())
             comp = line[0][:-1]
-            if 'l2' in comp:
-                continue
             if 'dcache.data' in comp:
                 continue
             hash_value = int(line[1])
             taint_comp[comp] = hash_value
         else:
             comp = line
-            if 'l2' in comp:
-                continue
             if 'dcache.data' in comp:
                 continue
             taint_comp[comp] = 1
@@ -80,6 +76,8 @@ def liveness_analysis(folder_path, case_num):
     print('BOOM')
     boom_folder = os.path.join(folder_path, 'BOOM')
     live_list = []
+    illegal_list = []
+    diverage_list = []
     for i in range(case_num):
         live_path = os.path.join(boom_folder, f'{i}.taint.live')
         live_comp = compute_comp(live_path)
@@ -88,15 +86,19 @@ def liveness_analysis(folder_path, case_num):
         live_comp = diff_comp(live_comp, live_early_comp)
         live_list.append(live_comp)
         log_path = os.path.join(boom_folder, f'{i}.taint.log')
+        illegal_list.append(False)
+        diverage_list.append(False)
         is_illegal = specdoctor_illegal(log_path)
         if is_illegal:
             print(f'case_num: {i} false positive')
             print('illegal')
+            illegal_list[-1] = True
             continue
         is_diverage = specdoctor_diverage(log_path)
         if is_diverage:
             print(f'case_num: {i} true positive')
             print('diverage')
+            diverage_list[-1] = True
             continue
         if len(live_comp.keys()) != 0:
             print(f'case_num: {i} true positive')
@@ -108,17 +110,25 @@ def liveness_analysis(folder_path, case_num):
     print('BOOM_without_mask')
     boom_folder = os.path.join(folder_path, 'BOOM_without_mask')
     for i in range(case_num):
+        if illegal_list[i]:
+            print(f'case_num: {i}')
+            print(f'illegal')
+            continue
+        if diverage_list[i]:
+            print(f'case_num: {i}')
+            print(f'diverage')
+            continue
         live_path = os.path.join(boom_folder, f'{i}.taint.live')
         live_comp = compute_comp(live_path)
         live_early_path = os.path.join(boom_folder, f'{i}.taint.live.early')
         live_early_comp = compute_comp(live_early_path)
         live_comp = diff_comp(live_comp, live_early_comp)
         if len(live_comp.keys()) == 0:
-            print(f'case_num: {i} false positive')
+            print(f'case_num: {i}')
             continue
         live_comp = diff_comp(live_comp, live_list[i])
         if len(live_comp.keys()) != 0:
-            print(f'case_num: {i} false positive')
+            print(f'case_num: {i}')
             for key,value in live_comp.items():
                 print(key, value)
 
