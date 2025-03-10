@@ -34,11 +34,11 @@ The final directory hierarchy of the `leak_dataset` is as follows:
 .
 ├── dejavuzz
 └── specdoctor
-    ├── S2M_ATTACKER
-    ├── S2M_VICTIM
-    ├── U2M_ATTACKER
-    ├── U2S_ATTACKER
-    └── U2S_VICTIM
+    ├── spec_0
+    ├── spec_1
+    ├── spec_2
+    ├── spec_3
+    └── spec_4
 ```
 
 * `dejavuzz`: it is a empty folder
@@ -54,11 +54,11 @@ For example, if I execute `specdoctor_leak_execute.py` in `20:50:56, 2024.12.27`
 
 ```
 .
-├── S2M_ATTACKER
-├── S2M_VICTIM
-├── U2M_ATTACKER
-├── U2S_ATTACKER
-└── U2S_VICTIM
+├── spec_0
+├── spec_1
+├── spec_2
+├── spec_3
+└── spec_4
 ```
 
 3. set up the stimulus template generator `razzle`. Razzle is used to generate simulation stimulus for RTL and to provide the fuzzing framework.
@@ -69,7 +69,7 @@ cd InstGenerator
 pip3 install -r requirements.txt
 ```
 
-4. execute `python dejavuzz_leak_execute.py` to use `razzle` do fuzzing on BOOM(SpecDoctor only support fuzzing on BOOM). This fuzzing will execute 20000 different testcases and store the coverage in `dejavuzz_result_xx-xx-xx-xx-xx-xx`, the `xx-xx-xx-xx-xx-xx` is the start execution time of `python dejavuzz_leak_execute.py`.
+4. execute `python dejavuzz_leak_execute.py` to use `razzle` do fuzzing on BOOM(SpecDoctor only support fuzzing on BOOM). This fuzzing will execute 20000 different testcases for DejaVuzz and DejaVuzz-(DejaVuzz without coverage guidence), and store the coverage in `dejavuzz_result_xx-xx-xx-xx-xx-xx`, the `xx-xx-xx-xx-xx-xx` is the start execution time of `python dejavuzz_leak_execute.py`.
 
 5. execute following command to draw the figure of DejaVuzz's and SpecDoctor's coverage curve. 
 
