@@ -105,7 +105,8 @@ The analysis result of BOOM with liveness mask is listed at the following. It id
 * 5 testcases from SpecDoctor are diverage of control flow becuase of load contention
 * 12 testcase from SpecDoctor can leak secret in dcache
 * 8 testcase from SpecDoctor seem to leak secret in loop, but we analysis assemble code and find these cases are diverage in control flow within transient windows. So the taint reports are not accurcy. All of them are false positive
-* remaining 50 testcases are just false positive
+* 1 testcase triggers transient window during train stage, we think it is illegal
+* remaining 49 testcases cannot encode secret in component during transient windows. SO all of them are just false positive
 
 The analysis result of BOOM without liveness mask is listed at the following. It identifies the true positive and false positive of BOOM without liveness mask.
 * 15 testcases can not access secret at all, so they can be identified as true negative easily.
