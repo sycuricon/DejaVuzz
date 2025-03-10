@@ -40,20 +40,6 @@ pip3 install -r requirements.txt
 
 ```
 .
-├── dejavuzz
-│   ├── BOOM_random_trigger_test_00
-│   ├── BOOM_random_trigger_test_01
-│   ├── ......
-│   ├── BOOM_trigger_test_00
-│   ├── BOOM_trigger_test_01
-│   ├── ......
-│   ├── XiangShan_random_trigger_test_00
-│   ├── XiangShan_random_trigger_test_01
-│   ├── ......
-│   ├── XiangShan_trigger_test_00
-│   ├── XiangShan_trigger_test_01
-│   ├── ......
-|   └── XiangShan_trigger_test_09
 └── specdoctor
     ├── S2M_ATTACKER
     ├── S2M_VICTIM
@@ -64,15 +50,11 @@ pip3 install -r requirements.txt
     └── U2S_VICTIM_2
 ```
 
-* `dejavuzz/BOOM_trigger_test*` are the trigger testcase set of `BOOM Dejavuzz`
-* `dejavuzz/BOOM_random_trigger_test*` are the trigger testcase set of `BOOM Dejavuzz*`
 * `specdoctor/*` are the trigger testcase set of `BOOM SpecDoctor`
-* `dejavuzz/XiangShan_trigger_test*` are the trigger testcase set of `XiangShan Dejavuzz`
-* `dejavuzz/XiangShan_random_trigger_test*` are the trigger testcase set of `XiangShan Dejavuzz*`
 
 ## Execute experiment
 
-1. run `python dejavuzz_trigger_execute.py` to run four trigger configuration, `BOOM DejaVuzz`, `BOOM DejaVuzz*`, `XiangShan DejaVuzz`, `XiangShan DejaVuzz*`. The fuzz result is in `exp2-trigger/build`. The execute `python dejavuzz_trigger_execute` to statstic the trainning overhead of four configurations.
+1. run `python dejavuzz_trigger_execute.py` to run four trigger configuration, `BOOM DejaVuzz`, `BOOM DejaVuzz*`, `XiangShan DejaVuzz`, `XiangShan DejaVuzz*`. The fuzz result is in `exp2-trigger/build`. The execute `python dejavuzz_trigger_statistic_runtime.py` to statstic the trainning overhead of four configurations.
 
 ```
 $ python dejavuzz_trigger_statistic.py 
@@ -100,35 +82,7 @@ XiangShan_random_trigger_test:
 
 `BOOM DejaVuzz`, `BOOM DejaVuzz*`, `XiangShan DejaVuzz`, `XiangShan DejaVuzz*` are corresponding to `BOOM_trigger_test`, `BOOM_random_trigger_test`, `XiangShan_trigger_test` and `XiangShan_trigger_test` in output of script. `ave_line_num` and `ave_valid_num` are corresponding to the TO and ETO in Table 3.
 
-2. run `python dejavuzz_trigger_statistic_dataset.py` to statstic the trainning overhead of `BOOM DejaVuzz`, `BOOM DejaVuzz*`, `XiangShan DejaVuzz`, `XiangShan DejaVuzz*`. 
-
-```
-$ python dejavuzz_trigger_statistic.py 
-BOOM_trigger_test:
-load/store access fault:        ave_line_num:0.0        ave_valid_num:0.0
-load/store page fault:  ave_line_num:0.0        ave_valid_num:0.0
-load/store misalign:    ave_line_num:0.0        ave_valid_num:0.0
-illegal instruction:    ave_line_num:*  ave_valid_num:*
-memory  disambiguation: ave_line_num:0.0        ave_valid_num:0.0
-branch mispredict:      ave_line_num:86.4       ave_valid_num:3.8
-indirect jump mispredict:       ave_line_num:85.7       ave_valid_num:2.8
-return address mispredict:      ave_line_num:85.6       ave_valid_num:2.7
-straight line speculation:      ave_line_num:0.0        ave_valid_num:0.0
-
-BOOM_random_trigger_test:
-...
-
-XiangShan_trigger_test:
-...
-
-XiangShan_random_trigger_test:
-...
-
-```
-
-The output format is the same with the `dejavuzz_trigger_statistic_runtime.py`'s.
-
-3. run `python specdoctor_trigger_statistic_dataset.py` to statstic the trainning overhead of SpecDoctor.
+2. run `python specdoctor_trigger_statistic_dataset.py` to statstic the trainning overhead of SpecDoctor.
 
 ```
 $ python specdoctor_trigger_statstic.py 
