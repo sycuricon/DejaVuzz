@@ -1,0 +1,52 @@
+import os
+
+num_cores = os.cpu_count()
+dep_root = os.path.abspath(os.path.join(os.getcwd(), "../../dep"))
+
+yosys_root = dep_root / "yosys-diffift"
+yosys_target = yosys_root / "yosys"
+
+cosim_root = dep_root / "riscv-isa-cosim"
+cosim_build = cosim_root / "build"
+cosim_target = cosim_build / "spike-solve"
+
+starship_root = dep_root / "starship-dejavuzz"
+starship_build = starship_root / "build" / "vcs"
+starship_mode = ["robprofile", "variant", "taint"]
+starship_core = ["BOOM", "XiangShan"]
+starship_targets = [starship_build / f"starship.asic.StarshipSimMiniConfig_{core}_{mode}" / "Testbench" for core in starship_core for mode in starship_mode]
+
+xiangshan_root = dep_root / "xiangshan-dejavuzz"
+xiangshan_build = xiangshan_root / "build" / "rtl"
+xiangshan_target = xiangshan_build / "XSTop.v"
+
+os.environ["XS_REPO_DIR"] = xiangshan_root
+os.environ["PATH"] += os.pathsep + os.pathsep.join([cosim_build, yosys_root])
+
+@target(yosys_target)
+def build_yosys(target, depends):
+    $"cd {yosys_root} && make config-gcc && make -j{num_cores}"
+
+@target(cosim_target)
+def build_cosim(target, depends):
+    $"mkdir -p {cosim_build}"
+    $"cd {cosim_build} && ../configure && make -j{num_cores}"
+
+@targets(starship_targets, lambda target: [xiangshan_target] if "XiangShan" in target else [])
+def build_starship(target, depends):
+    cfg = target.split("/")[-2].split("_")
+    core, mode = cfg[1], cfg[2]
+    $"cd {starship_root} && make STARSHIP_CORE={core} SIMULATION_MODE={mode} vcs-dummy"
+
+@target(xiangshan_target)
+def build_xiangshan(target, depends):
+    $"cd {xiangshan_root} && ./generate.sh"
+
+@task([yosys_target, cosim_target] + starship_targets)
+def setup_dependencies(target, depends):
+    print("In-house dependencies are set up successfully.")
+
+@task()
+def clean(target, depends):
+    $"rm -rf {cosim_build} {starship_build} {xiangshan_root}/build"
+    $"cd {yosys_root} && make clean"

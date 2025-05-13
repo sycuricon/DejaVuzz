@@ -1,0 +1,9 @@
+import os
+
+def check_external_dependencies(tool, vendor):
+    ret = os.system(f"which {tool} >/dev/null 2>&1")
+    if ret != 0:
+        raise FileNotFoundError(f"Tool {tool} not found. Please install it from {vendor} first.")
+
+check_external_dependencies("vcs", "https://www.synopsys.com/verification/simulation/vcs.html")
+check_external_dependencies("riscv64-unknown-elf-gcc", "https://github.com/sycuricon/riscv-spike-sdk")
