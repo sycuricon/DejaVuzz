@@ -1,9 +1,5 @@
-build
 build/
-InstGenerator/
-starship-parafuzz/
-yosys-pift/
-riscv-isa-cosim/
-mill/
-xiangshan-dejavuzz/
+dep/
 .*.ptm.py
+*.log
+ae_*
