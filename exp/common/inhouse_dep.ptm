@@ -11,10 +11,10 @@ cosim_build = cosim_root / "build"
 cosim_target = cosim_build / "spike-solve"
 
 starship_root = dep_root / "starship-dejavuzz"
-starship_build = starship_root / "build" / "vcs"
-starship_mode = ["robprofile", "variant", "taint"]
+starship_build = starship_root / "build"
+starship_mode = ["robprofile", "variant"]
 starship_core = ["BOOM", "XiangShan"]
-starship_targets = [starship_build / f"starship.asic.StarshipSimMiniConfig_{core}_{mode}" / "Testbench" for core in starship_core for mode in starship_mode]
+starship_targets = [starship_build / "vcs" / f"starship.asic.StarshipSimMiniConfig_{core}_{mode}" / "build" / "Testbench" for core in starship_core for mode in starship_mode]
 
 xiangshan_root = dep_root / "xiangshan-dejavuzz"
 xiangshan_build = xiangshan_root / "build" / "rtl"
@@ -34,7 +34,7 @@ def build_cosim(target, depends):
 
 @targets(starship_targets, lambda target: [xiangshan_target] if "XiangShan" in target else [])
 def build_starship(target, depends):
-    cfg = target.split("/")[-2].split("_")
+    cfg = target.split("/")[-3].split("_")
     core, mode = cfg[1], cfg[2]
     $"cd {starship_root} && make STARSHIP_CORE={core} SIMULATION_MODE={mode} vcs-dummy"
 
@@ -50,3 +50,11 @@ def setup_dependencies(target, depends):
 def clean(target, depends):
     $"rm -rf {cosim_build} {starship_build} {xiangshan_root}/build"
     $"cd {yosys_root} && make clean"
+
+@task()
+def dejavuzz_clean(target, depends):
+    $"rm -rf {starship_build}"
+
+@task()
+def xiangshan_clean(target, depends):
+    $"rm -rf {xiangshan_root}/build"

@@ -1,0 +1,88 @@
+import os
+
+num_cores = os.cpu_count()
+dep_root = os.path.abspath(os.path.join(os.getcwd(), "../../dep"))
+
+specdoc_root = dep_root / "starship-specdoctor"
+specdoc_build = specdoc_root / "build"
+specdoc_target = specdoc_build / "vcs" / f"starship.asic.StarshipSimMiniConfig_BOOM_variant" / "build" / "Testbench"
+
+cellift_yosys_root = dep_root / "yosys-cellift"
+cellift_yosys_target = cellift_yosys_root / "cellift-yosys"
+
+diffift_root = dep_root / "starship-diffift"
+diffift_build = diffift_root / "build"
+diffift_boom_target = diffift_build / "vcs" / f"starship.asic.StarshipSimMiniConfig_BOOM_variant" / "build" / "Testbench"
+diffift_xiangshan_target = diffift_build / "vcs" / f"starship.asic.StarshipSimMiniConfig_XiangShan_variant" / "build" / "Testbench"
+normal_boom_target = diffift_build / "vcs" / f"starship.asic.StarshipSimMiniConfig_BOOM_robprofile" / "build" / "Testbench"
+normal_xiangshan_target = diffift_build / "vcs" / f"starship.asic.StarshipSimMiniConfig_XiangShan_robprofile" / "build" / "Testbench"
+
+cellift_root = dep_root / "starship-cellift"
+cellift_build = cellift_root / "build"
+cellift_boom_target = cellift_build / "vcs" / f"starship.asic.StarshipSimMiniConfig_BOOM_taint" / "build" / "Testbench"
+cellift_xiangshan_target = cellift_build / "vcs" / f"starship.asic.StarshipSimMiniConfig_XiangShan_taint" / "build" / "Testbench"
+
+starship_fn_root = dep_root / "starship-dejavuzz-fn"
+starship_fn_build = starship_fn_root / "build"
+starship_fn_target = starship_fn_build / "vcs" / f"starship.asic.StarshipSimMiniConfig_BOOM_variant" / "build" / "Testbench"
+
+xiangshan_root = dep_root / "xiangshan-dejavuzz-diffift"
+xiangshan_build = xiangshan_root / "build" / "rtl"
+xiangshan_target = xiangshan_build / "XSTop.v"
+
+os.environ["PATH"] += os.pathsep + cellift_yosys_root
+
+@target(specdoc_target)
+def build_specdoctor(target, depends):
+    cfg = target.split("/")[-3].split("_")
+    core, mode = cfg[1], cfg[2]
+    $"cd {specdoc_root} && make STARSHIP_CORE=BOOM SIMULATION_MODE=variant vcs-dummy"
+
+@target(cellift_yosys_target)
+def build_cellift_yosys(target, depends):
+    $"cd {cellift_root} && make config-gcc && make -j{num_cores}"
+
+@targets([diffift_boom_target, diffift_xiangshan_target, normal_boom_target, normal_xiangshan_target], lambda target: [xiangshan_target] if "XiangShan" in target else [])
+def build_diffift(target, depends):
+    cfg = target.split("/")[-3].split("_")
+    core, mode = cfg[1], cfg[2]
+    $"cd {diffift_root} && make STARSHIP_CORE={core} SIMULATION_MODE={mode} vcs-dummy"
+
+@targets([cellift_boom_target, cellift_xiangshan_target])
+def build_cellift_boom(target, depends):
+    cfg = target.split("/")[-3].split("_")
+    core, mode = cfg[1], cfg[2]
+    $"cd {cellift_root} && make STARSHIP_CORE={core} SIMULATION_MODE={mode} vcs-dummy"
+
+@target(starship_fn_target)
+def build_starship_fn(target, depends):
+    $"cd {starship_fn_root} && make STARSHIP_CORE=BOOM SIMULATION_MODE=variant vcs-dummy"
+
+@target(xiangshan_target)
+def build_xiangshan(target, depends):
+    $"cd {xiangshan_root} && ./generate.sh"
+
+@task([specdoc_target])
+def figure7_dependencies(target, depends):
+    print("Competitors' dependencies are set up successfully.")
+
+@task([cellift_yosys_target, cellift_boom_target, starship_fn_target])
+def figure6_dependencies(target, depends):
+    print("Competitors' dependencies are set up successfully.")
+
+@task()
+def clean(target, depends):
+    $"rm -rf {cosim_build} {starship_build} {xiangshan_root}/build"
+    $"cd {yosys_root} && make clean"
+
+@task()
+def cellift_clean(target, depends):
+    $"rm -rf {cellift_build}"
+
+@task()
+def diffift_clean(target, depends):
+    $"rm -rf {diffift_build}"
+
+@task()
+def xiangshan_clean(target, depends):
+    $"rm -rf {xiangshan_root}/build"
