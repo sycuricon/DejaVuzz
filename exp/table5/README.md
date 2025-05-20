@@ -5,11 +5,15 @@ By replaying the test cases that triggered vulnerabilities during the fuzzing, w
 
 ## Execution
 
+### Step 0
+
 To run the experiment, you first need to set up the dataset by executing the following command:
 
 ```bash
 python3 step0_dataset_setup.py
 ```
+
+## Step 1
 
 After the dataset is set up, you can run the experiment by executing the following command:
 
@@ -17,10 +21,13 @@ After the dataset is set up, you can run the experiment by executing the followi
 python3 step1_dataset_execute.py
 ```
 
+After running the experiment, you will find that a new result directory has been created in the current directory.
+The result directory starts with `deja_` and ends with a timestamp, like `deja_2025-05-16-13-20-24`.
+
 ## Result
 
-After running the experiment, you can find the results in a directory starting with `ae_` and a timestamp in the current directory, like `ae_2025-05-16-13-20-24`.
-For cases that violate constant time execution property, we identify them using execution traces from the `.log` files.
+DejaVuzz identifies the vulnerabilities through the execution traces and the taint liveness annotations in the result directory.
+For cases that violate the constant time execution property, we identify them using execution traces from the `.log` files.
 For cases that do not exhibit constant time execution violations, we further use the taint liveness generated `.live` files to identify potential leakages.
 
 ### BOOM
