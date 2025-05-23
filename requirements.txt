@@ -1,1 +1,4 @@
-phantom-make >= 0.1.1
+phantom-make >= 0.1.3
+pandas
+matplotlib
+scipy
