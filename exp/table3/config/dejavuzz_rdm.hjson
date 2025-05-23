@@ -1,0 +1,68 @@
+{
+  train_align: False
+  train_single: False
+  trigger_rate: 0.75
+  access_rate: 1.5
+  mem_start: 0x80000000
+  mem_size: 0x80000000
+  init:
+  {
+    bound:
+    [
+      0x80000000
+      0x80001000
+    ]
+    virtual_bound:
+    [
+      0x0000000080000000
+      0x0000000080001000
+    ]
+    pmp: 4
+    init_input: config/snapshot/dummy_state.hjson
+  }
+  page_table:
+  {
+    bound:
+    [
+      0x80001000
+      0x80004000
+    ]
+    virtual_bound:
+    [
+      0x0000000000001000
+      0x0000000000004000
+    ]
+    pg_level: 3
+    xLen: 64
+  }
+  trans_frame:
+  {
+    bound:
+    [
+      0x80004000
+      0x80020000
+      0x80030000
+      0x80040000
+    ]
+    virtual_bound:
+    [
+      0x0000000000004000
+      0x0000000000020000
+      0x0000000000030000
+      0x0000000000040000
+    ]
+  }
+  trans_body:
+  {
+    bound:
+    [
+      0x80020000
+      0x80030000
+    ]
+    virtual_bound:
+    [
+      0x0000000000020000
+      0x0000000000030000
+    ]
+  }
+}
