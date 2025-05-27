@@ -44,7 +44,7 @@ def dejavuzz_execute_and_analysis(repo_prefix, target_core, train_config, group_
     global log_file
     log_file = os.path.join(repo_path, 'fuzz.log')
     if not os.path.exists(repo_path):
-        os.mkdir(repo_path)
+        os.makedirs(repo_path)
     if not os.path.exists(log_file):
         dejavuzz_record_log(f'create {log_file}')
     dejavuzz_record_log(f'fuzz {group_prefix}')
