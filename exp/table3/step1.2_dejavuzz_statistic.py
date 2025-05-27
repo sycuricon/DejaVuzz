@@ -55,9 +55,12 @@ def statistic_trigger(folder_name):
                     if line.startswith('return_block_entry') or line.startswith('nop_ret_block_entry'):
                         break
                     if line != '' and line[0] != '.' and line[0] != '#' and line[-1] != ':':
+                        inst_len = 1
+                        if line.startswith('la') or line.startswith('li'):
+                            inst_len = 2
                         if line != 'nop' and line != 'c.nop':
-                            valid_num += 1
-                        line_num += 1 
+                            valid_num += inst_len
+                        line_num += inst_len
 
         overhead[trigger_type]['line_num'] += line_num
         overhead[trigger_type]['valid_num'] += valid_num
@@ -83,14 +86,21 @@ def statstic_type(case_dataset:str, kind_name):
         case_num = value['case_num']
         line_num = value['line_num']
         valid_num = value['valid_num']
+
         if case_num == 0:
             ave_line_num = '*'
             ave_valid_num = '*'
-            print(f'{key}:\tTO:{ave_line_num}\tETO:{ave_valid_num}')
+            if 'rdm' in kind_name:
+                print(f'{key}:\tTO:{ave_line_num}\t')
+            else:
+                print(f'{key}:\tTO:{ave_line_num}\tETO:{ave_valid_num}')
         else:
             ave_line_num = line_num/case_num
             ave_valid_num = valid_num/case_num
-            print(f'{key}:\tTO:{ave_line_num:.1f}\tETO:{ave_valid_num:.1f}')
+            if 'rdm' in kind_name:
+                print(f'{key}:\tTO:{ave_line_num}\t')
+            else:
+                print(f'{key}:\tTO:{ave_line_num:.1f}\tETO:{ave_valid_num:.1f}')
 
     print()
         
