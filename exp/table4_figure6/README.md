@@ -33,6 +33,7 @@ To generate Figure 6, execute the following command:
 
 ```bash
 python3 step2_draw_taint_curve.py --taint <simulation time result directory>
+# e.g., python3 step2_draw_taint_curve.py --taint ae_sim_2025-05-19-14-54-13
 ```
 
 ## Result
