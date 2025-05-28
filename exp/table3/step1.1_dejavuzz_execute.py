@@ -50,7 +50,7 @@ def dejavuzz_execute_and_analysis(repo_prefix, target_core, train_config, group_
     dejavuzz_record_log(f'fuzz {group_prefix}')
 
     fuzz_path = os.path.join(current_folder, 'build', f'{target_core}_{group_prefix}')
-    assert not os.path.exists(fuzz_path), f"the repo {fuzz_path} has existed, please delete that repo or execute script again"
+    # assert not os.path.exists(fuzz_path), f"the repo {fuzz_path} has existed, please delete that repo or execute script again"
     command = f'make do-fuzz-trigger PREFIX={group_prefix} TARGET_CORE={target_core} TRAIN_CONFIG={train_config}'
     stop_event = threading.Event()
     fuzz_thread = threading.Thread(target=execute_command, args=(stop_event, command, EXAMINE_INTERVAL/4))
@@ -74,10 +74,10 @@ def dejavuzz_execute_and_analysis(repo_prefix, target_core, train_config, group_
         if trigger_time_counter >= TRIGGER_MAX_TIME:
             new_trigger_iter_num = trigger_iter_num - last_trigger_iter_num
             dejavuzz_record_log(f'trigger_time:{trigger_time_counter}\ttrigger_num:{trigger_iter_num}\tlast_trigger_num:{last_trigger_iter_num}\tnew_trigger_num:{new_trigger_iter_num}')
-            if new_trigger_iter_num == 0:
-                dejavuzz_record_log(f'fuzz {group_prefix} fails, because new trigger time out')
-                # print("trigger fuzz time out")
-                break 
+            # if new_trigger_iter_num == 0:
+            #     dejavuzz_record_log(f'fuzz {group_prefix} fails, because new trigger time out')
+            #     # print("trigger fuzz time out")
+            #     break 
             trigger_time_counter %= TRIGGER_MAX_TIME
             last_trigger_iter_num = trigger_iter_num
         
