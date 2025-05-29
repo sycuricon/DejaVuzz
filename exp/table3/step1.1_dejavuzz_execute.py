@@ -4,6 +4,7 @@ import time
 import signal
 import threading
 import subprocess
+import traceback
 
 from ptm import include, builder
 
@@ -107,6 +108,8 @@ def task(core, train_config, timestamp, log_dir):
                     break
     except Exception as e:
         dejavuzz_record_log('main program died')
+        dejavuzz_record_log(str(e))
+        dejavuzz_record_log(traceback.format_exc())
         current_path = os.path.abspath(__file__)
         current_folder = os.path.dirname(current_path)
         fuzz_working_flag = os.path.join(current_folder, f'build/{core}_{group_prefix}/template_repo/fuzz_working_flag')
