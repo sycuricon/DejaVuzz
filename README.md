@@ -7,10 +7,10 @@ For full technical details, please refer to our [ASPLOS 2025 paper](https://arxi
 
 This repository includes the source code and scripts for reproducing four experiments:
 
-- Exp1: Training Overhead (Table 3)
-- Exp2: Instrument Overhead (Table 4) and Taint Comparison (Figure 6)
-- Exp3: Coverage Comparison (Figure 7)
-- Exp4: Replaying Discovered Bugs (Table 5)
+- Training Overhead (Table 3)
+- Instrument Overhead (Table 4) and Taint Comparison (Figure 6)
+- Coverage Comparison (Figure 7)
+- Replaying Discovered Bugs (Table 5)
 
 
 ## Requirements
@@ -26,16 +26,19 @@ sudo yum -y install gcc-toolset-11
 ```
 
 Besides, To cross-compile RISC-V programs, install the official toolchain from the official [riscv-gnu-toolchain repository](https://github.com/riscv-collab/riscv-gnu-toolchain).
-DejaVuzz also relies on Synopsys VCS for RTL simulation. A valid Synopsys license is required to run these experiments.
+DejaVuzz also relies on Synopsys VCS for RTL simulation.
+A valid Synopsys license is required to run the experiments.
+Add them to your `PATH` environment variable.
 
-Python is used to manage the build process and generate figures. Install Python dependencies with:
+Python is used to manage the build process and generate figures.
+Install required Python dependencies with:
 
 ```bash
 pip3 install -r requirements.txt
 ```
 
-Next, you need to download several external dependencies from [zenodo](#TODO) and extracted into the `dep/` directory.
-Once everything is set up, the directory structure should resemble the following:
+Next, several external dependencies must be downloaded from [zenodo](https://zenodo.org/records/15378560/files/dep.zip) and extracted as the `dep/` directory.
+Once all dependencies are in place, your directory structure should look like this:
 
 ```
 DejaVuzz
@@ -60,8 +63,6 @@ DejaVuzz
     └── table5
 ```
 
-## Execute
-
 ### Setup
 
 To initialize the environment variables and configure required paths, run the following script from the root of the repository:
@@ -70,17 +71,26 @@ To initialize the environment variables and configure required paths, run the fo
 python3 setup.py
 ```
 
-### Experiments
+If setup completes successfully, you should see the following message:
+
+```bash
+In-house dependencies are set up successfully.
+```
+
+> Note: Do not start any experiments before the setup script completes. Otherwise, the system may attempt to recompile dependencies, which could lead to conflicts.
+
+## Experiments
 
 To reproduce the results presented in the paper, refer to the `README.md` files in the corresponding subdirectories under `exp/`.
 Execute the commands provided in each directory to run the associated experiment:
 
 - `exp/table3`: Training Overhead (Table 3)
-- `exp/table4_figure6`: Instrumentation Overhead and Taint Curve (Table 4 & Figure 6)
+- `exp/table4_figure6`: Instrumentation Overhead (Table 4) and Taint Comparison (Figure 6)
 - `exp/figure7`: Coverage Comparison (Figure 7)
 - `exp/table5`: Bug Replay (Table 5)
 
-## Attribution
+
+## Citation
 
 ```
 @article{xu2025dejavuzz,
