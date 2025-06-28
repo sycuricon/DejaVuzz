@@ -40,7 +40,7 @@ def build_specdoctor(target, depends):
 
 @target(cellift_yosys_target)
 def build_cellift_yosys(target, depends):
-    $"cd {cellift_root} && make config-gcc && make -j{num_cores}"
+    $"cd {cellift_yosys_root} && make config-gcc && make -j{num_cores}"
 
 @targets([diffift_boom_target, diffift_xiangshan_target, normal_boom_target, normal_xiangshan_target], lambda target: [xiangshan_target] if "XiangShan" in target else [])
 def build_diffift(target, depends):
