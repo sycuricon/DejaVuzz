@@ -13,7 +13,7 @@ To run the experiment, you first need to set up the dataset by executing the fol
 python3 step0_dataset_setup.py
 ```
 
-## Step 1
+### Step 1
 
 After the dataset is set up, you can run the experiment by executing the following command:
 
