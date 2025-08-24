@@ -1,4 +1,4 @@
-# DejaVuzz: Disclosing Transient Execution Bugs with Dynamic Swappable Memory and Differential Information Flow Tracking assisted Processor Fuzzing
+# DejaVuzz: Disclosing Transient Execution Bugs with Dynamic Swappable Memory and Differential Information Flow Tracking Assisted Processor Fuzzing
 
 DejaVuzz is a pre-silicon processor fuzzer designed to uncover transient execution bugs.
 By introducing two novel operating primitives (i.e., dynamic swappable memory and differential information flow tracking), DejaVuzz significantly enhances microarchitectural controllability and observability, enabling it to efficiently trigger transient execution windows and detect potential secret leakages.
@@ -93,10 +93,11 @@ Execute the commands provided in each directory to run the associated experiment
 ## Citation
 
 ```
-@article{xu2025dejavuzz,
-  title={DejaVuzz: Disclosing Transient Execution Bugs with Dynamic Swappable Memory and Differential Information Flow Tracking assisted Processor Fuzzing},
+@inproceedings{xu2025dejavuzz,
+  title={DejaVuzz: Disclosing Transient Execution Bugs with Dynamic Swappable Memory and Differential Information Flow Tracking Assisted Processor Fuzzing},
   author={Xu, Jinyan and Zhou, Yangye and Zhang, Xingzhi and Li, Yinshuai and Tan, Qinhan and Zhang, Yinqian and Zhou, Yajin and Chang, Rui and Shen, Wenbo},
-  journal={arXiv preprint arXiv:2504.20934},
+  booktitle={Proceedings of the 30th ACM International Conference on Architectural Support for Programming Languages and Operating Systems, Volume 3},
+  pages={64--80},
   year={2025}
 }
 ```
