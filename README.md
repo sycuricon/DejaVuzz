@@ -3,7 +3,7 @@
 DejaVuzz is a pre-silicon processor fuzzer designed to uncover transient execution bugs.
 By introducing two novel operating primitives (i.e., dynamic swappable memory and differential information flow tracking), DejaVuzz significantly enhances microarchitectural controllability and observability, enabling it to efficiently trigger transient execution windows and detect potential secret leakages.
 DejaVuzz has been evaluated on two out-of-order RISC-V processors, BOOM and XiangShan, and successfully discovered five previously unknown variants of transient execution vulnerabilities.
-For full technical details, please refer to our [ASPLOS 2025 paper](https://arxiv.org/abs/2504.20934).
+For full technical details, please refer to our [ASPLOS 2025 paper](https://dl.acm.org/doi/abs/10.1145/3676642.3736115).
 
 This repository includes the source code and scripts for reproducing four experiments:
 
